@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { Camera, Upload, Trash2, ImageIcon, Move } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface PhotoManagementProps {
   userImages: string[];
-  onPhotosAdded: (newPhotos: string[]) => void;
+  onPhotosAdded?: (newPhotos: string[]) => void;
   onPhotosReordered?: (reorderedPhotos: string[]) => void;
   onPhotoDeleted?: (index: number) => void;
 }
@@ -29,7 +28,6 @@ const PhotoManagement: React.FC<PhotoManagementProps> = ({
   const [editablePhotos, setEditablePhotos] = useState<string[]>([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
-  // Initialize editable photos when dialog opens
   const handleOpenDialog = () => {
     setEditablePhotos([...userImages]);
     setSelectedFiles([]);
@@ -71,21 +69,34 @@ const PhotoManagement: React.FC<PhotoManagementProps> = ({
         return;
       }
 
-      onPhotosAdded(previewUrls);
-
-      setSelectedFiles([]);
-      setPreviewUrls([]);
-      toast({
-        title: "Photos added",
-        description: `${selectedFiles.length} photo(s) added to your profile.`
-      });
+      if (onPhotosAdded) {
+        onPhotosAdded(previewUrls);
+        
+        setSelectedFiles([]);
+        setPreviewUrls([]);
+        toast({
+          title: "Photos added",
+          description: `${selectedFiles.length} photo(s) added to your profile.`
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Photo upload handler not available",
+          variant: "destructive"
+        });
+      }
     } else {
-      // Handle saving reordered photos
       if (onPhotosReordered) {
         onPhotosReordered(editablePhotos);
         toast({
           title: "Photos updated",
           description: "Your photo order has been updated."
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Photo reordering handler not available",
+          variant: "destructive"
         });
       }
     }
@@ -106,7 +117,6 @@ const PhotoManagement: React.FC<PhotoManagementProps> = ({
     newPhotos.splice(index, 1);
     setEditablePhotos(newPhotos);
     
-    // Notify parent component
     if (onPhotoDeleted) {
       onPhotoDeleted(index);
     }
@@ -126,7 +136,6 @@ const PhotoManagement: React.FC<PhotoManagementProps> = ({
     e.preventDefault();
     if (draggedIndex === null || draggedIndex === index) return;
     
-    // Reorder the photos
     const newPhotos = [...editablePhotos];
     const draggedPhoto = newPhotos[draggedIndex];
     newPhotos.splice(draggedIndex, 1);

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Separator } from '@/components/ui/separator';
 import ProfileHeader from '@/components/profile/ProfileHeader';
