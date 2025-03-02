@@ -1,6 +1,5 @@
 
 import { PhotoManagementState } from '../types/photoManagementTypes';
-import { useToast } from "@/hooks/use-toast";
 
 export function handleFileSelect(
   e: React.ChangeEvent<HTMLInputElement>,
@@ -9,10 +8,18 @@ export function handleFileSelect(
   if (e.target.files && e.target.files.length > 0) {
     const newFiles = Array.from(e.target.files);
     
+    // Create object URLs for the new files
+    const newPreviewUrls = newFiles.map(file => {
+      const url = URL.createObjectURL(file);
+      console.log(`Created object URL for file: ${file.name}`, url);
+      return url;
+    });
+    
     setState(prev => {
       const updatedFiles = [...prev.selectedFiles, ...newFiles];
-      const newPreviewUrls = newFiles.map(file => URL.createObjectURL(file));
       const updatedPreviewUrls = [...prev.previewUrls, ...newPreviewUrls];
+      
+      console.log("Updated preview URLs:", updatedPreviewUrls);
       
       return {
         ...prev,
@@ -30,7 +37,11 @@ export function handleRemovePhoto(
   setState(prev => {
     // Revoke object URL to prevent memory leaks
     if (prev.previewUrls[index]) {
-      URL.revokeObjectURL(prev.previewUrls[index]);
+      try {
+        URL.revokeObjectURL(prev.previewUrls[index]);
+      } catch (e) {
+        console.error("Error revoking URL:", e);
+      }
     }
     
     const newPreviewUrls = [...prev.previewUrls];

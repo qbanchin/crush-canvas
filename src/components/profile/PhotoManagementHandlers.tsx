@@ -30,8 +30,19 @@ const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ chil
       }
       
       console.log("Adding photos:", newPhotos);
-      const updatedImages = [...user.images, ...newPhotos];
       
+      // Create a copy of existing images and add new ones
+      const updatedImages = [...user.images];
+      
+      // Filter out placeholder image if it's the only one
+      if (updatedImages.length === 1 && updatedImages[0] === '/placeholder.svg') {
+        updatedImages.length = 0;
+      }
+      
+      // Add new photos
+      updatedImages.push(...newPhotos);
+      
+      // Update the database
       const { error } = await supabase
         .from('cards')
         .update({ images: updatedImages })
@@ -39,6 +50,7 @@ const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ chil
       
       if (error) throw error;
       
+      // Update local state
       setUser({
         ...user,
         images: updatedImages
@@ -118,6 +130,11 @@ const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ chil
       
       const updatedImages = [...user.images];
       updatedImages.splice(index, 1);
+      
+      // If all photos are deleted, add placeholder back
+      if (updatedImages.length === 0) {
+        updatedImages.push('/placeholder.svg');
+      }
       
       const { error } = await supabase
         .from('cards')

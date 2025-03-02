@@ -50,19 +50,24 @@ const ProfileData: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           // Get user metadata for additional info
           const fullName = authUser.user_metadata?.full_name || data.name;
           
+          // Ensure images is an array and has at least the placeholder
+          const userImages = data.images && Array.isArray(data.images) && data.images.length > 0
+            ? data.images
+            : ["/placeholder.svg"];
+          
           setUser({
             name: fullName,
             age: data.age || 0,
             bio: data.bio || "",
-            location: "Your location", // Default location if not set
-            images: data.images || ["/placeholder.svg"],
+            location: data.location || "Your location", // Default location if not set
+            images: userImages,
             interests: data.tags || []
           });
           
           setEditForm({
             name: fullName,
             age: data.age || 0,
-            location: "Your location"
+            location: data.location || "Your location"
           });
         }
       } catch (error: any) {

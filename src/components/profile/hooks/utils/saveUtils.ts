@@ -32,10 +32,20 @@ export function handleSavePhotos(
     }
 
     if (typeof onPhotosAdded === 'function') {
+      // Make sure we're passing the actual file URLs to the handler
+      console.log("Calling onPhotosAdded with:", previewUrls);
       onPhotosAdded(previewUrls);
       
-      // Clean up object URLs and reset state
-      previewUrls.forEach(url => URL.revokeObjectURL(url));
+      // Clean up object URLs after successful upload
+      setTimeout(() => {
+        previewUrls.forEach(url => {
+          try {
+            URL.revokeObjectURL(url);
+          } catch (e) {
+            console.error("Error revoking URL:", e);
+          }
+        });
+      }, 1000);
       
       setState(prev => ({
         ...prev,
@@ -53,6 +63,7 @@ export function handleSavePhotos(
     }
   } else if (activeTab === "edit") {
     if (typeof onPhotosReordered === 'function') {
+      console.log("Calling onPhotosReordered with:", editablePhotos);
       onPhotosReordered(editablePhotos);
       
       setState(prev => ({
