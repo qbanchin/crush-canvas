@@ -74,12 +74,14 @@ export const usePhotoManagement = ({
           description: `${selectedFiles.length} photo(s) added to your profile.`
         });
       } else {
+        console.error("Photo upload handler not available");
         toast({
           title: "Error",
-          description: "Photo upload handler not available",
+          description: "Photo upload handler not available. Please try again later.",
           variant: "destructive"
         });
       }
+      setIsDialogOpen(false);
     } else {
       if (onPhotosReordered) {
         onPhotosReordered(editablePhotos);
@@ -88,14 +90,15 @@ export const usePhotoManagement = ({
           description: "Your photo order has been updated."
         });
       } else {
+        console.error("Photo reorder handler not available");
         toast({
           title: "Error",
-          description: "Photo reordering handler not available",
+          description: "Photo reordering handler not available. Please try again later.",
           variant: "destructive"
         });
       }
+      setIsDialogOpen(false);
     }
-    setIsDialogOpen(false);
   };
 
   const handleDeleteExistingPhoto = (index: number) => {
