@@ -93,7 +93,7 @@ const AuthPage = () => {
       });
       
       if (error) throw error;
-      navigate('/');
+      navigate('/profile');
     } catch (error: any) {
       toast.error(error.message);
     } finally {
