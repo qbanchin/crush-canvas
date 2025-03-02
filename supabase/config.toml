@@ -13,27 +13,21 @@ port = 54322
 enabled = true
 port = 54323
 
-# We need to tell Supabase Studio about our new delete-connection function
-[[functions]]
-name = "get-cards"
+# Define functions with proper format
+[functions.get-cards]
 verify_jwt = false
 
-[[functions]]
-name = "get-matches"
+[functions.get-matches]
 verify_jwt = false
 
-[[functions]]
-name = "get-messages"
+[functions.get-messages]
 verify_jwt = false
 
-[[functions]]
-name = "record-swipe"
+[functions.record-swipe]
 verify_jwt = false
 
-[[functions]]
-name = "send-message"
+[functions.send-message]
 verify_jwt = false
 
-[[functions]]
-name = "delete-connection"
+[functions.delete-connection]
 verify_jwt = false
