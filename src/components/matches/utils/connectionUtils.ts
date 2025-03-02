@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, profiles } from '@/data/profiles';
 import { ExtendedProfile } from '../types/connectionTypes';
@@ -54,7 +53,8 @@ export const getTestConnections = (unreadMessages: Record<string, boolean>): Ext
     bio: "Travel enthusiast and coffee addict. Always looking for new adventures!",
     images: ["/lovable-uploads/045f4838-7fe0-4265-943a-0d7ba5dec7de.png"],
     tags: ["Travel", "Coffee", "Photography"],
-    hasNewMessage: true
+    hasNewMessage: true,
+    distance: 3 // Add required distance property
   };
   
   // Michael Jui's profile
@@ -64,7 +64,8 @@ export const getTestConnections = (unreadMessages: Record<string, boolean>): Ext
     age: 32,
     bio: "Software engineer by day, chef by night. Love hiking and exploring nature.",
     images: ["/lovable-uploads/290973f2-f16b-4e56-8cfe-afb3b85e2239.png"],
-    tags: ["Coding", "Cooking", "Hiking"]
+    tags: ["Coding", "Cooking", "Hiking"],
+    distance: 5 // Add required distance property
   };
   
   // Use one random profile from the local data and add our two custom ones
