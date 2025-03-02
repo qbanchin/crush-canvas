@@ -156,13 +156,13 @@ const ProfileSettings: React.FC = () => {
   return (
     <div className="space-y-4">
       <SettingsLink title="Explore Settings" to="/settings/explore" />
-      <SettingsLink title="Notification Settings" />
-      <SettingsLink title="Privacy Settings" />
+      <SettingsLink title="Notification Settings" to="/settings/notifications" />
+      <SettingsLink title="Privacy Settings" to="/settings/privacy" />
       <SettingsLink 
         title="Change Password" 
         onClick={() => setShowPasswordForm(true)} 
       />
-      <SettingsLink title="Help & Support" />
+      <SettingsLink title="Help & Support" to="/help" />
       
       {showPasswordForm && (
         <>
