@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 
@@ -53,7 +54,9 @@ export const usePhotoManagement = ({
   };
 
   const handleSavePhotos = () => {
+    // Check the tab we're in
     if (activeTab === "add") {
+      // For Add tab
       if (selectedFiles.length === 0) {
         toast({
           title: "No photos selected",
@@ -63,40 +66,48 @@ export const usePhotoManagement = ({
         return;
       }
 
-      if (typeof onPhotosAdded === 'function') {
-        onPhotosAdded(previewUrls);
-        
-        setSelectedFiles([]);
-        setPreviewUrls([]);
-        toast({
-          title: "Photos added",
-          description: `${selectedFiles.length} photo(s) added to your profile.`
-        });
-        setIsDialogOpen(false);
-      } else {
+      if (!onPhotosAdded) {
+        // When handler is missing, show error but don't close dialog so user can try another action
         console.error("Photo upload handler not available");
         toast({
-          title: "Error",
-          description: "Photo upload handler not available. Please try again later.",
+          title: "Service unavailable",
+          description: "Photo upload is currently unavailable. Please try again later.",
           variant: "destructive"
         });
+        return;
       }
+      
+      // Execute the handler directly
+      onPhotosAdded(previewUrls);
+      
+      // Clean up
+      setSelectedFiles([]);
+      setPreviewUrls([]);
+      toast({
+        title: "Photos added",
+        description: `${selectedFiles.length} photo(s) added to your profile.`
+      });
+      setIsDialogOpen(false);
     } else {
-      if (typeof onPhotosReordered === 'function') {
-        onPhotosReordered(editablePhotos);
-        toast({
-          title: "Photos updated",
-          description: "Your photo order has been updated."
-        });
-        setIsDialogOpen(false);
-      } else {
+      // For Edit tab
+      if (!onPhotosReordered) {
+        // When handler is missing, show error but don't close dialog so user can try another action
         console.error("Photo reorder handler not available");
         toast({
-          title: "Error",
-          description: "Photo reordering handler not available. Please try again later.",
+          title: "Service unavailable",
+          description: "Photo reordering is currently unavailable. Please try again later.",
           variant: "destructive"
         });
+        return;
       }
+      
+      // Execute the handler directly
+      onPhotosReordered(editablePhotos);
+      toast({
+        title: "Photos updated",
+        description: "Your photo order has been updated."
+      });
+      setIsDialogOpen(false);
     }
   };
 

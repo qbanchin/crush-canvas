@@ -88,13 +88,57 @@ const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  const handlePhotoDeleted = async (index: number) => {
+    try {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      
+      if (!authUser) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to update your profile",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      const updatedImages = [...user.images];
+      updatedImages.splice(index, 1);
+      
+      const { error } = await supabase
+        .from('cards')
+        .update({ images: updatedImages })
+        .eq('id', authUser.id);
+      
+      if (error) throw error;
+      
+      setUser({
+        ...user,
+        images: updatedImages
+      });
+      
+      setCurrentImageIndex(0);
+      
+      toast({
+        title: "Photo deleted",
+        description: "Your profile photo has been deleted successfully."
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error deleting photo",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div>
       {React.Children.map(children, child => {
         if (React.isValidElement(child)) {
           return React.cloneElement(child, {
             onPhotosAdded: handlePhotosAdded,
-            onPhotosReordered: handlePhotosReordered
+            onPhotosReordered: handlePhotosReordered,
+            onPhotoDeleted: handlePhotoDeleted
           } as any);
         }
         return child;
