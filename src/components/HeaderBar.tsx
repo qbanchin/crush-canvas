@@ -25,12 +25,16 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
     )}>
       <div className="flex items-center">
         {title === "Discover" && (
-          <div className="flex items-center">
+          <div className="flex flex-col items-center">
             <img 
               src="/lovable-uploads/290973f2-f16b-4e56-8cfe-afb3b85e2239.png" 
               alt="Global Love" 
-              className="h-10 w-10 object-contain" 
+              className="h-14 w-14 object-contain" 
             />
+            <div className="text-sm font-semibold -mt-1">
+              <span className="text-secondary">Single</span>
+              <span className="text-primary">Expats</span>
+            </div>
           </div>
         )}
         {title !== "Discover" && (
