@@ -4,7 +4,7 @@ import { useChat } from '@/hooks/useChat';
 import MessageList from './chat/MessageList';
 import MessageInput from './chat/MessageInput';
 import { ChatProps } from '@/types/message.types';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 const ConnectionChat = ({ 
   open, 
@@ -14,6 +14,7 @@ const ConnectionChat = ({
   useTestData,
   onMessageSent
 }: ChatProps) => {
+  // Use our refactored chat hook
   const {
     messageText,
     setMessageText,
@@ -23,21 +24,33 @@ const ConnectionChat = ({
     handleSendMessage
   } = useChat(connection, currentUserId, useTestData, onMessageSent, open);
 
+  // Ref for the textarea to focus it when dialog opens
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
   // Auto-focus the textarea when the dialog opens
   useEffect(() => {
-    if (open) {
+    if (open && textareaRef.current) {
       setTimeout(() => {
-        const textarea = document.querySelector('.dialog-content textarea');
-        if (textarea) {
-          (textarea as HTMLTextAreaElement).focus();
+        if (textareaRef.current) {
+          textareaRef.current.focus();
         }
       }, 100);
     }
   }, [open]);
 
+  // Handle sending message on Enter key
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey && !sendingMessage) {
+      e.preventDefault();
+      if (messageText.trim()) {
+        handleSendMessage();
+      }
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md max-h-[80vh] flex flex-col dialog-content">
+      <DialogContent className="sm:max-w-md max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{connection?.name || 'Connection'}</DialogTitle>
           <DialogDescription>
@@ -54,6 +67,8 @@ const ConnectionChat = ({
           onMessageChange={setMessageText}
           onSendMessage={handleSendMessage}
           isSending={sendingMessage}
+          textareaRef={textareaRef}
+          handleKeyDown={handleKeyDown}
         />
       </DialogContent>
     </Dialog>
