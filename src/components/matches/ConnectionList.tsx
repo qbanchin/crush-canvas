@@ -67,10 +67,12 @@ const ConnectionList = ({ connections, loading, onProfileClick }: ConnectionList
             
             <div className="p-3">
               <div className="flex items-center gap-1">
-                {hasNewMessage && (
-                  <span className="block h-2 w-2 mr-1 rounded-full bg-green-500"></span>
-                )}
                 <h3 className="font-medium">{connection.name}, {connection.age}</h3>
+                {hasNewMessage && (
+                  <div className="relative flex items-center">
+                    <span className="block h-2 w-2 rounded-full bg-green-500"></span>
+                  </div>
+                )}
               </div>
               <p className="text-sm text-muted-foreground truncate">{connection.bio || "No bio available"}</p>
             </div>
