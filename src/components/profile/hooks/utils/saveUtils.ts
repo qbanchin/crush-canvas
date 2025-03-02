@@ -1,6 +1,5 @@
-
 import { PhotoManagementState, PhotoManagementHandlers } from '../types/photoManagementTypes';
-import { convertBlobToBase64 } from './fileUtils';
+import { convertBlobToBase64 } from './fileConversion';
 
 export async function handleSavePhotos(
   state: PhotoManagementState,
