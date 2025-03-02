@@ -10,6 +10,10 @@ import InterestsEditor from '@/components/profile/InterestsEditor';
 import ProfileSettings from '@/components/profile/ProfileSettings';
 import ActionButtons from '@/components/profile/ActionButtons';
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const ProfilePage = () => {
   const { toast } = useToast();
@@ -28,6 +32,12 @@ const ProfilePage = () => {
   const [showOnlineStatus, setShowOnlineStatus] = useState(true);
   const [showActivity, setShowActivity] = useState(true);
   const [distanceUnit, setDistanceUnit] = useState("km");
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: user.name,
+    age: user.age,
+    location: user.location
+  });
 
   const handlePrevImage = () => {
     setCurrentImageIndex((prev) => (prev === 0 ? user.images.length - 1 : prev - 1));
@@ -82,7 +92,67 @@ const ProfilePage = () => {
   };
 
   const handleEditProfile = () => {
-    // Future functionality for edit profile button
+    setEditForm({
+      name: user.name,
+      age: user.age,
+      location: user.location
+    });
+    setIsEditProfileOpen(true);
+  };
+
+  const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditForm({
+      ...editForm,
+      [name]: name === 'age' ? parseInt(value) || 0 : value
+    });
+  };
+
+  const handleSaveProfile = () => {
+    // Validate form data
+    if (!editForm.name.trim()) {
+      toast({
+        title: "Invalid name",
+        description: "Name cannot be empty",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (editForm.age < 18 || editForm.age > 120) {
+      toast({
+        title: "Invalid age",
+        description: "Age must be between 18 and 120",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!editForm.location.trim()) {
+      toast({
+        title: "Invalid location",
+        description: "Location cannot be empty",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Update user data
+    setUser({
+      ...user,
+      name: editForm.name,
+      age: editForm.age,
+      location: editForm.location
+    });
+
+    // Close the dialog
+    setIsEditProfileOpen(false);
+
+    // Show success toast
+    toast({
+      title: "Profile updated",
+      description: "Your profile has been successfully updated."
+    });
   };
 
   return (
@@ -130,6 +200,48 @@ const ProfilePage = () => {
       </main>
       
       <NavBar />
+
+      <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid w-full items-center gap-1.5">
+              <Label htmlFor="name">Name</Label>
+              <Input 
+                id="name" 
+                name="name"
+                value={editForm.name} 
+                onChange={handleEditFormChange}
+              />
+            </div>
+            <div className="grid w-full items-center gap-1.5">
+              <Label htmlFor="age">Age</Label>
+              <Input 
+                id="age" 
+                name="age"
+                type="number" 
+                value={editForm.age} 
+                onChange={handleEditFormChange}
+              />
+            </div>
+            <div className="grid w-full items-center gap-1.5">
+              <Label htmlFor="location">Location</Label>
+              <Input 
+                id="location" 
+                name="location"
+                value={editForm.location} 
+                onChange={handleEditFormChange}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditProfileOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveProfile}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
