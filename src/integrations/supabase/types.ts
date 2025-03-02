@@ -9,7 +9,66 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      cards: {
+        Row: {
+          age: number
+          bio: string | null
+          created_at: string | null
+          distance: number | null
+          id: string
+          images: string[]
+          name: string
+          tags: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          age: number
+          bio?: string | null
+          created_at?: string | null
+          distance?: number | null
+          id?: string
+          images: string[]
+          name: string
+          tags?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          age?: number
+          bio?: string | null
+          created_at?: string | null
+          distance?: number | null
+          id?: string
+          images?: string[]
+          name?: string
+          tags?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      matches: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_match: boolean | null
+          liked_user_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_match?: boolean | null
+          liked_user_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_match?: boolean | null
+          liked_user_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
