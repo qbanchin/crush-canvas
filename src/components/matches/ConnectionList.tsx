@@ -38,7 +38,7 @@ const ConnectionList = ({ connections, loading, onProfileClick }: ConnectionList
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {connections.map((connection) => {
         const hasMultipleImages = connection.images && connection.images.length > 1;
-        const hasNewMessage = connection.hasNewMessage; // This comes from the profile data
+        const hasNewMessage = connection.hasNewMessage; // Now TypeScript knows this is allowed
         
         return (
           <div 

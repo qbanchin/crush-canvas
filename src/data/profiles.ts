@@ -7,6 +7,7 @@ export interface Profile {
   distance: number;
   images: string[];
   tags: string[];
+  hasNewMessage?: boolean;
 }
 
 export const profiles: Profile[] = [
