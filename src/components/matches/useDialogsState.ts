@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Profile } from '@/data/profiles';
 
@@ -22,16 +21,14 @@ export function useDialogsState() {
 
   const handleChatClose = (open: boolean) => {
     setChatOpen(open);
-    // Only reset selected profile when chat is closed
-    if (!open) {
-      // Don't reset the selected profile when chat is closed
-      // This was causing the issue where chat couldn't work between profiles
-    }
+    // We keep the selected profile even when chat is closed
+    // so that users can reopen the chat with the same profile
   };
 
   const handleMessageSent = () => {
     // This is called when a message is sent successfully
     // We could use this to refresh connections if needed
+    console.log("Message sent successfully");
   };
 
   return {

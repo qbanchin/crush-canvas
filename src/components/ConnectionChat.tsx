@@ -5,6 +5,7 @@ import { useChat } from '@/hooks/useChat';
 import MessageList from './chat/MessageList';
 import MessageInput from './chat/MessageInput';
 import { ChatProps } from '@/types/message.types';
+import { useEffect } from 'react';
 
 const ConnectionChat = ({ 
   open, 
@@ -23,9 +24,21 @@ const ConnectionChat = ({
     handleSendMessage
   } = useChat(connection, currentUserId, useTestData, onMessageSent, open);
 
+  // Auto-focus the textarea when the dialog opens
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => {
+        const textarea = document.querySelector('.dialog-content textarea');
+        if (textarea) {
+          (textarea as HTMLTextAreaElement).focus();
+        }
+      }, 100);
+    }
+  }, [open]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md max-h-[80vh] flex flex-col">
+      <DialogContent className="sm:max-w-md max-h-[80vh] flex flex-col dialog-content">
         <DialogHeader>
           <DialogTitle>Chat with {connection?.name || 'Connection'}</DialogTitle>
           <DialogDescription>

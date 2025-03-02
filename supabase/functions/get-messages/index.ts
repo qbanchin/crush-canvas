@@ -34,10 +34,12 @@ serve(async (req) => {
       )
     }
 
+    console.log(`Fetching messages between ${userId} and ${recipientId}`)
+
     // This is a mock implementation for now
     // In a real app, you would query your messages table
 
-    // Mock messages
+    // Include more varied mock messages
     const mockMessages = [
       {
         id: '1',

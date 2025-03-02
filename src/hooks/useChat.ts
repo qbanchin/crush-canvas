@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Message } from '@/types/message.types';
 import { Profile } from '@/data/profiles';
@@ -43,7 +43,12 @@ export const useChat = (
           // Fall back to test data
           loadTestMessages();
         } else if (data && Array.isArray(data)) {
-          setMessages(data);
+          // Mark messages as from current user or not
+          const processedMessages = data.map(msg => ({
+            ...msg,
+            isFromCurrentUser: msg.senderId === currentUserId
+          }));
+          setMessages(processedMessages);
         }
       } else {
         // Use test data
@@ -83,7 +88,7 @@ export const useChat = (
     setMessages(testMessages);
   };
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = useCallback(async () => {
     if (!messageText.trim() || !connection) {
       return;
     }
@@ -134,7 +139,7 @@ export const useChat = (
     } finally {
       setSendingMessage(false);
     }
-  };
+  }, [messageText, connection, currentUserId, useTestData, onMessageSent]);
 
   return {
     messageText,

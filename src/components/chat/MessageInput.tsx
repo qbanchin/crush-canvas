@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { KeyboardEvent } from "react";
 
 interface MessageInputProps {
   messageText: string;
@@ -15,6 +16,15 @@ const MessageInput = ({
   onSendMessage, 
   isSending 
 }: MessageInputProps) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (messageText.trim() && !isSending) {
+        onSendMessage();
+      }
+    }
+  };
+
   return (
     <div className="border-t pt-4">
       <div className="flex gap-2">
@@ -22,6 +32,7 @@ const MessageInput = ({
           placeholder="Write your message here..."
           value={messageText}
           onChange={(e) => onMessageChange(e.target.value)}
+          onKeyDown={handleKeyDown}
           className="min-h-[80px]"
         />
       </div>
