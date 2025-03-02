@@ -1,11 +1,10 @@
-
 import React, { useState, useRef } from 'react';
 import HeaderBar from '@/components/HeaderBar';
 import NavBar from '@/components/NavBar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Settings, Camera, Edit, MapPin, ChevronRight, Check, X, Upload, Trash2 } from 'lucide-react';
+import { Settings, Camera, Edit, MapPin, ChevronRight, Check, X, Upload, Trash2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -359,18 +358,6 @@ const ProfilePage = () => {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-            </div>
-            
-            {/* Upgrade banner */}
-            <div className="mb-8 p-4 rounded-xl bg-gradient-to-r from-tinder-red to-tinder-blue text-white">
-              <div className="flex items-center gap-3 mb-2">
-                <Sparkles className="h-5 w-5" />
-                <h3 className="font-semibold">Get Tinder Gold</h3>
-              </div>
-              <p className="text-sm mb-3">See who likes you & more!</p>
-              <Button variant="secondary" className="w-full bg-white/20 hover:bg-white/30 backdrop-blur-sm">
-                Upgrade
-              </Button>
             </div>
             
             {/* Bio section */}
