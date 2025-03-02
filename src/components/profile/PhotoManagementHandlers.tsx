@@ -40,6 +40,7 @@ const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ chil
         description: `${newPhotos.length} photo(s) added to your profile.`
       });
     } catch (error: any) {
+      console.error("Error adding photos:", error);
       toast({
         title: "Error adding photos",
         description: error.message,
@@ -80,6 +81,7 @@ const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ chil
         description: "Your profile photos have been reordered successfully."
       });
     } catch (error: any) {
+      console.error("Error reordering photos:", error);
       toast({
         title: "Error reordering photos",
         description: error.message,
@@ -123,6 +125,7 @@ const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ chil
         description: "Your profile photo has been deleted successfully."
       });
     } catch (error: any) {
+      console.error("Error deleting photo:", error);
       toast({
         title: "Error deleting photo",
         description: error.message,

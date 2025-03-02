@@ -66,12 +66,12 @@ export const usePhotoManagement = ({
         return;
       }
 
-      if (!onPhotosAdded) {
+      if (typeof onPhotosAdded !== 'function') {
         // When handler is missing, show error but don't close dialog so user can try another action
         console.error("Photo upload handler not available");
         toast({
-          title: "Service unavailable",
-          description: "Photo upload is currently unavailable. Please try again later.",
+          title: "Photo upload currently unavailable",
+          description: "Please try again later or contact support.",
           variant: "destructive"
         });
         return;
@@ -90,12 +90,12 @@ export const usePhotoManagement = ({
       setIsDialogOpen(false);
     } else {
       // For Edit tab
-      if (!onPhotosReordered) {
+      if (typeof onPhotosReordered !== 'function') {
         // When handler is missing, show error but don't close dialog so user can try another action
         console.error("Photo reorder handler not available");
         toast({
-          title: "Service unavailable",
-          description: "Photo reordering is currently unavailable. Please try again later.",
+          title: "Photo reordering currently unavailable",
+          description: "Please try again later or contact support.",
           variant: "destructive"
         });
         return;
@@ -125,8 +125,15 @@ export const usePhotoManagement = ({
     newPhotos.splice(index, 1);
     setEditablePhotos(newPhotos);
     
-    if (onPhotoDeleted) {
+    if (typeof onPhotoDeleted === 'function') {
       onPhotoDeleted(index);
+    } else {
+      console.error("Photo delete handler not available");
+      toast({
+        title: "Photo deletion currently unavailable",
+        description: "Changes will not be saved. Please try again later.",
+        variant: "destructive"
+      });
     }
   };
 

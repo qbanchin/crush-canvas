@@ -7,7 +7,7 @@ import PhotoManagement from './PhotoManagement';
 interface ActionButtonsProps {
   onEditProfile: () => void;
   userImages: string[];
-  onPhotosAdded: (newPhotos: string[]) => void;
+  onPhotosAdded?: (newPhotos: string[]) => void;
   onPhotosReordered?: (reorderedPhotos: string[]) => void;
   onPhotoDeleted?: (index: number) => void;
 }
