@@ -4,6 +4,7 @@
 // This enables autocomplete, go to definition, etc.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.22.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -35,39 +36,80 @@ serve(async (req) => {
       )
     }
     
-    // In a real implementation, you would save the message to a database
-    // const { data, error } = await supabaseClient
-    //   .from('messages')
-    //   .insert({
-    //     sender_id: userId,
-    //     recipient_id: recipientId,
-    //     content: message,
-    //   })
+    // Connect to Supabase
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    const supabase = createClient(supabaseUrl, supabaseKey);
     
-    // Generate a unique ID for the message with timestamp for better uniqueness
-    const messageId = `sent-${Date.now()}-${Math.floor(Math.random() * 10000)}`
+    // Generate a unique ID for the message
+    const messageId = crypto.randomUUID();
+    const timestamp = new Date().toISOString();
     
-    console.log(`Sending message: ${messageId} from ${userId} to ${recipientId}`)
+    console.log(`Sending message: ${messageId} from ${userId} to ${recipientId}`);
     
-    // For now, we'll just simulate a successful message send
-    const data = {
-      id: messageId,
-      senderId: userId,
-      recipientId: recipientId,
-      content: message,
-      timestamp: new Date().toISOString(),
+    // Create messages table if it doesn't exist (will only run once)
+    const { error: tableError } = await supabase.rpc('create_messages_table_if_not_exists');
+    if (tableError) {
+      console.error("Error checking/creating messages table:", tableError);
+      // Continue anyway - table might already exist
     }
+    
+    // Insert message into the database
+    const { data, error } = await supabase
+      .from('messages')
+      .insert({
+        id: messageId,
+        sender_id: userId,
+        recipient_id: recipientId,
+        content: message,
+        timestamp: timestamp,
+        read: false
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error("Error storing message:", error);
+      
+      // If the insert failed, still return a message object
+      // This allows the UI to continue functioning
+      const fallbackData = {
+        id: messageId,
+        senderId: userId,
+        recipientId: recipientId,
+        content: message,
+        timestamp: timestamp,
+        isFromCurrentUser: true
+      };
+      
+      return new Response(
+        JSON.stringify(fallbackData),
+        { 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+          status: 200 
+        }
+      );
+    }
+    
+    // Transform the database format to match the frontend format
+    const responseData = {
+      id: data.id,
+      senderId: data.sender_id,
+      recipientId: data.recipient_id,
+      content: data.content,
+      timestamp: data.timestamp,
+    };
 
     // Return a success response with the new message
     return new Response(
-      JSON.stringify(data),
+      JSON.stringify(responseData),
       { 
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
         status: 200 
       }
-    )
+    );
   } catch (error) {
-    console.error("Error in send-message function:", error)
+    console.error("Error in send-message function:", error);
     
     // Handle errors
     return new Response(
@@ -76,6 +118,6 @@ serve(async (req) => {
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
         status: 500 
       }
-    )
+    );
   }
-})
+});

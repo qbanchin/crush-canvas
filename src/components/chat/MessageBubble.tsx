@@ -11,7 +11,7 @@ const MessageBubble = ({ message }: MessageBubbleProps) => {
   const isCurrentUser = message.isFromCurrentUser;
   
   // Format the timestamp if it exists
-  const formattedTime = message.timestamp ? formatChatDate(message.timestamp) : '';
+  const formattedTime = message.timestamp ? formatChatDate(new Date(message.timestamp)) : '';
   
   return (
     <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-3 animate-in fade-in-50 slide-in-from-bottom-3 duration-300`}>

@@ -139,7 +139,6 @@ export const useChat = (
       const sentMessageText = messageText.trim();
       setMessageText('');
       
-      // In a real app, this would send the message to your backend
       if (!useTestData) {
         // Try to use Supabase function
         const { data, error } = await supabase.functions.invoke('send-message', {
@@ -167,6 +166,8 @@ export const useChat = (
             } : msg
           ));
         }
+        
+        // In a real app, we would also handle message delivery confirmation here
       } else {
         // Just simulate a delay for test data
         await new Promise(resolve => setTimeout(resolve, 500));

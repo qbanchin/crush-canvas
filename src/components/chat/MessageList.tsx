@@ -12,25 +12,12 @@ const MessageList = ({ messages, loading }: MessageListProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   
-  // Force scroll to bottom whenever messages change
+  // Scroll to bottom whenever messages change
   useEffect(() => {
     if (messagesEndRef.current) {
-      // Immediate scroll for better UX
       messagesEndRef.current.scrollIntoView({ behavior: 'auto' });
-      
-      // Then smooth scroll after a small delay to ensure DOM updates are complete
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
     }
-  }, [messages.length]); // Only watch messages.length instead of the entire array
-
-  // Initial scroll to bottom when component mounts
-  useEffect(() => {
-    if (messagesEndRef.current && messagesContainerRef.current) {
-      messagesEndRef.current.scrollIntoView();
-    }
-  }, []);
+  }, [messages]);
 
   if (loading) {
     return (

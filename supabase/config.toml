@@ -46,3 +46,4 @@ verify_jwt = false
 verify_jwt = false
 [functions.get-messages]
 verify_jwt = false
+

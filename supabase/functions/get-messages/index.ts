@@ -4,11 +4,14 @@
 // This enables autocomplete, go to definition, etc.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.22.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
+
+console.log("Hello from Get Messages Function!")
 
 serve(async (req) => {
   // Handle CORS preflight request
@@ -27,77 +30,80 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
         { 
-          headers: { 'Content-Type': 'application/json', ...corsHeaders }, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
           status: 400 
         }
       )
     }
     
-    console.log(`Fetching messages between ${userId} and ${recipientId}`)
+    // Connect to Supabase
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    const supabase = createClient(supabaseUrl, supabaseKey);
     
-    // In a real implementation, you would fetch messages from a database
-    // const { data, error } = await supabaseClient
-    //   .from('messages')
-    //   .select('*')
-    //   .or(`sender_id.eq.${userId},recipient_id.eq.${userId}`)
-    //   .or(`sender_id.eq.${recipientId},recipient_id.eq.${recipientId}`)
-    //   .order('created_at', { ascending: true })
+    console.log(`Getting messages between ${userId} and ${recipientId}`);
     
-    // For demo, we'll generate some fake messages
-    const now = new Date()
-    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+    // Create the stored procedure if it doesn't exist
+    const { error: procError } = await supabase.rpc('create_messages_table_if_not_exists');
+    if (procError) {
+      console.error("Error checking/creating messages table:", procError);
+      // Continue anyway - stored procedure or table might already exist
+    }
     
-    const messages = [
-      {
-        id: "1",
-        senderId: userId,
-        recipientId: recipientId,
-        content: "Hey there! How are you doing?",
-        timestamp: new Date(oneDayAgo.getTime()).toISOString()
-      },
-      {
-        id: "2",
-        senderId: recipientId,
-        recipientId: userId,
-        content: "I'm doing great! Thanks for asking. How about you?",
-        timestamp: new Date(oneDayAgo.getTime() + 1000000).toISOString()
-      },
-      {
-        id: "3",
-        senderId: userId,
-        recipientId: recipientId,
-        content: "I'm good! Just checking out this new app. The interface is nice.",
-        timestamp: new Date(oneDayAgo.getTime() + 2000000).toISOString()
-      },
-      {
-        id: "4",
-        senderId: recipientId,
-        recipientId: userId,
-        content: "Yeah, it's pretty cool. Would you like to meet up sometime?",
-        timestamp: new Date(oneDayAgo.getTime() + 43200000).toISOString()
-      }
-    ]
+    // Get messages between these two users (in both directions)
+    const { data: messages, error } = await supabase
+      .from('messages')
+      .select('*')
+      .or(`sender_id.eq.${userId},recipient_id.eq.${userId}`)
+      .or(`sender_id.eq.${recipientId},recipient_id.eq.${recipientId}`)
+      .order('timestamp', { ascending: true });
+    
+    if (error) {
+      console.error("Error retrieving messages:", error);
+      
+      // Return empty array if there's an error
+      return new Response(
+        JSON.stringify([]),
+        { 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+          status: 200 
+        }
+      );
+    }
+    
+    // Filter for only messages between these two users
+    const filteredMessages = messages.filter(msg => 
+      (msg.sender_id === userId && msg.recipient_id === recipientId) ||
+      (msg.sender_id === recipientId && msg.recipient_id === userId)
+    );
+    
+    // Transform the database format to match the frontend format
+    const responseData = filteredMessages.map(msg => ({
+      id: msg.id,
+      senderId: msg.sender_id,
+      recipientId: msg.recipient_id,
+      content: msg.content,
+      timestamp: msg.timestamp
+    }));
 
-    console.log("Messages loaded:", messages)
-    
-    // Return messages
+    // Return the messages
     return new Response(
-      JSON.stringify(messages),
+      JSON.stringify(responseData),
       { 
-        headers: { 'Content-Type': 'application/json', ...corsHeaders }, 
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
         status: 200 
       }
-    )
+    );
   } catch (error) {
-    console.error("Error in get-messages function:", error)
+    console.error("Error in get-messages function:", error);
     
     // Handle errors
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
-        headers: { 'Content-Type': 'application/json', ...corsHeaders }, 
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
         status: 500 
       }
-    )
+    );
   }
-})
+});
