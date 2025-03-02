@@ -1,5 +1,6 @@
 
 import { Profile } from '@/data/profiles';
+import { ImageIcon } from 'lucide-react';
 
 interface ConnectionListProps {
   connections: Profile[];
@@ -35,26 +36,40 @@ const ConnectionList = ({ connections, loading, onProfileClick }: ConnectionList
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-      {connections.map((connection) => (
-        <div 
-          key={connection.id} 
-          className="flex flex-col border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-          onClick={() => onProfileClick(connection.id)}
-        >
+      {connections.map((connection) => {
+        const hasMultipleImages = connection.images && connection.images.length > 1;
+        
+        return (
           <div 
-            className="h-40 bg-cover bg-center hover:opacity-90 transition-opacity" 
-            style={{ 
-              backgroundImage: `url(${connection.images && connection.images.length > 0 
-                ? connection.images[0] 
-                : '/placeholder.svg'})` 
-            }}
-          ></div>
-          <div className="p-3">
-            <h3 className="font-medium">{connection.name}, {connection.age}</h3>
-            <p className="text-sm text-muted-foreground truncate">{connection.bio || "No bio available"}</p>
+            key={connection.id} 
+            className="flex flex-col border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+            onClick={() => onProfileClick(connection.id)}
+          >
+            <div className="relative">
+              <div 
+                className="h-40 bg-cover bg-center hover:opacity-90 transition-opacity" 
+                style={{ 
+                  backgroundImage: `url(${connection.images && connection.images.length > 0 
+                    ? connection.images[0] 
+                    : '/placeholder.svg'})` 
+                }}
+              ></div>
+              
+              {hasMultipleImages && (
+                <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded-md text-xs flex items-center">
+                  <ImageIcon size={12} className="mr-1" />
+                  {connection.images?.length || 0}
+                </div>
+              )}
+            </div>
+            
+            <div className="p-3">
+              <h3 className="font-medium">{connection.name}, {connection.age}</h3>
+              <p className="text-sm text-muted-foreground truncate">{connection.bio || "No bio available"}</p>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

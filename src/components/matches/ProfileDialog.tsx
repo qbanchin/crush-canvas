@@ -9,6 +9,8 @@ import {
   DialogDescription
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import ProfileCarousel from '@/components/ProfileCarousel';
 
 interface ProfileDialogProps {
   profile: Profile | null;
@@ -18,7 +20,28 @@ interface ProfileDialogProps {
 }
 
 const ProfileDialog = ({ profile, open, onOpenChange, onOpenChat }: ProfileDialogProps) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
   if (!profile) return null;
+  
+  const images = profile.images || [];
+  const validIndex = Math.min(Math.max(0, currentImageIndex), images.length - 1);
+  
+  const prevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (images.length <= 1) return;
+    setCurrentImageIndex((prev) => 
+      prev > 0 ? prev - 1 : images.length - 1
+    );
+  };
+
+  const nextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (images.length <= 1) return;
+    setCurrentImageIndex((prev) => 
+      prev < images.length - 1 ? prev + 1 : 0
+    );
+  };
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -32,9 +55,18 @@ const ProfileDialog = ({ profile, open, onOpenChange, onOpenChat }: ProfileDialo
         
         <div className="grid gap-4 py-4">
           <div 
-            className="h-60 bg-cover bg-center rounded-md" 
-            style={{ backgroundImage: `url(${profile.images[0]})` }}
-          ></div>
+            className="h-60 bg-cover bg-center rounded-md relative" 
+            style={{ backgroundImage: `url(${images[validIndex] || '/placeholder.svg'})` }}
+          >
+            {images.length > 0 && (
+              <ProfileCarousel 
+                images={images}
+                currentImageIndex={validIndex}
+                onPrevImage={prevImage}
+                onNextImage={nextImage}
+              />
+            )}
+          </div>
           
           <p>{profile.bio}</p>
           
