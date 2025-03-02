@@ -8,6 +8,7 @@ import ConnectionChat from '@/components/ConnectionChat';
 import { useConnectionsData } from '@/components/matches/useConnectionsData';
 import { useDialogsState } from '@/components/matches/useDialogsState';
 import ConnectionsHeader from '@/components/matches/ConnectionsHeader';
+import { useNotificationBadges } from '@/hooks/useNotificationBadges';
 
 const MatchesPage = () => {
   const { 
@@ -29,12 +30,7 @@ const MatchesPage = () => {
     handleMessageSent
   } = useDialogsState();
 
-  // Function to clear notifications that will be passed down to children
-  const clearNotifications = () => {
-    // Find the navbar component instance and call its clearNotification method
-    const event = new CustomEvent('clear-notifications');
-    window.dispatchEvent(event);
-  };
+  const { clearBadge } = useNotificationBadges();
 
   // Function to handle profile clicks that also clears message flags
   const handleProfileSelection = (profileId: string) => {
@@ -53,7 +49,6 @@ const MatchesPage = () => {
         <ConnectionsHeader 
           useTestData={useTestData} 
           toggleTestData={toggleTestData}
-          clearNotifications={clearNotifications}
         />
         
         <ConnectionList 

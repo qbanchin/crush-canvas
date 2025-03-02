@@ -1,81 +1,28 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Binoculars, MessageSquare, User, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useNotificationBadges } from '@/hooks/useNotificationBadges';
 
 interface NavBarProps {
   className?: string;
 }
 
 const NavBar: React.FC<NavBarProps> = ({ className }) => {
-  const [hasNewActivity, setHasNewActivity] = useState(false);
+  const { badges, clearBadge } = useNotificationBadges();
   
   useEffect(() => {
-    // Check for new connections or messages
-    const checkForNewActivity = async () => {
-      try {
-        const { data: user } = await supabase.auth.getUser();
-        const userId = user?.user?.id || "temp-user-id";
-        
-        // Subscribe to new connections and messages
-        const channel = supabase
-          .channel('connection-notifications')
-          .on(
-            'postgres_changes',
-            {
-              event: 'INSERT',
-              schema: 'public',
-              table: 'connections'
-            },
-            (payload) => {
-              if (payload.new && (payload.new.user_id === userId || payload.new.connected_user_id === userId)) {
-                console.log("New connection detected");
-                setHasNewActivity(true);
-                toast.success("You have a new connection!");
-              }
-            }
-          )
-          .on(
-            'postgres_changes',
-            {
-              event: 'INSERT',
-              schema: 'public',
-              table: 'messages'
-            },
-            (payload) => {
-              if (payload.new && payload.new.recipient_id === userId) {
-                console.log("New message detected");
-                setHasNewActivity(true);
-                toast.success("You have a new message!");
-              }
-            }
-          )
-          .subscribe();
-          
-        // For development - simulate a new notification after 5 seconds
-        if (import.meta.env.DEV) {
-          setTimeout(() => {
-            setHasNewActivity(true);
-          }, 5000);
-        }
-        
-        return () => {
-          supabase.removeChannel(channel);
-        };
-      } catch (error) {
-        console.error("Error setting up activity notification:", error);
-      }
-    };
-    
-    checkForNewActivity();
-  }, []);
-  
-  const clearNotification = () => {
-    setHasNewActivity(false);
-  };
+    // Show toasts for new notifications
+    if (badges.connections) {
+      toast.success("You have a new connection!");
+    }
+    if (badges.messages) {
+      toast.success("You have a new message!");
+    }
+  }, [badges]);
 
   return (
     <nav className={cn(
@@ -100,11 +47,11 @@ const NavBar: React.FC<NavBarProps> = ({ className }) => {
           "flex flex-col items-center gap-1 text-sm transition-all relative",
           isActive ? "text-primary" : "text-muted-foreground"
         )}
-        onClick={clearNotification}
+        onClick={() => clearBadge('connections')}
       >
         <div className="relative">
           <MessageSquare size={24} />
-          {hasNewActivity && (
+          {badges.connections && (
             <CheckCircle 
               size={16} 
               className="absolute -top-1 -right-2 text-green-500 fill-green-500" 
@@ -117,11 +64,19 @@ const NavBar: React.FC<NavBarProps> = ({ className }) => {
       <NavLink 
         to="/profile" 
         className={({ isActive }) => cn(
-          "flex flex-col items-center gap-1 text-sm transition-all",
+          "flex flex-col items-center gap-1 text-sm transition-all relative",
           isActive ? "text-primary" : "text-muted-foreground"
         )}
       >
-        <User size={24} />
+        <div className="relative">
+          <User size={24} />
+          {badges.profile && (
+            <CheckCircle 
+              size={16} 
+              className="absolute -top-1 -right-2 text-green-500 fill-green-500" 
+            />
+          )}
+        </div>
         <span>Profile</span>
       </NavLink>
     </nav>
