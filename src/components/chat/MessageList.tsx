@@ -1,6 +1,7 @@
 
 import { Message } from '@/types/message.types';
 import MessageBubble from './MessageBubble';
+import { useEffect, useRef } from 'react';
 
 interface MessageListProps {
   messages: Message[];
@@ -8,6 +9,14 @@ interface MessageListProps {
 }
 
 const MessageList = ({ messages, loading }: MessageListProps) => {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-4">
@@ -25,10 +34,11 @@ const MessageList = ({ messages, loading }: MessageListProps) => {
   }
   
   return (
-    <div className="space-y-2">
+    <div className="space-y-4 pb-2">
       {messages.map((message) => (
         <MessageBubble key={message.id} message={message} />
       ))}
+      <div ref={messagesEndRef} />
     </div>
   );
 };

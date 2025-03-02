@@ -22,7 +22,8 @@ export const useChat = (
     if (open && connection) {
       fetchMessages();
     }
-    // Reset message state when connection changes
+    
+    // Reset message state when connection changes or dialog closes
     return () => {
       if (!open) {
         setMessages([]);
@@ -145,7 +146,8 @@ export const useChat = (
         }
 
         // If successful, refresh messages to get the properly saved message
-        setTimeout(() => fetchMessages(), 300);
+        await new Promise(resolve => setTimeout(resolve, 300));
+        fetchMessages();
       } else {
         // Just simulate a delay for test data
         await new Promise(resolve => setTimeout(resolve, 500));

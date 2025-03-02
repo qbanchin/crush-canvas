@@ -11,7 +11,7 @@ const MessageBubble = ({ message }: MessageBubbleProps) => {
   const isCurrentUser = message.isFromCurrentUser;
   
   return (
-    <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-2`}>
+    <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
       <div 
         className={`max-w-[80%] rounded-lg p-3 ${
           isCurrentUser 
@@ -19,7 +19,7 @@ const MessageBubble = ({ message }: MessageBubbleProps) => {
             : 'bg-muted text-foreground'
         }`}
       >
-        <div className="break-words">{message.content}</div>
+        <div className="break-words whitespace-pre-wrap">{message.content}</div>
         <div className={`text-xs mt-1 ${
           isCurrentUser ? 'text-primary-foreground/70' : 'text-muted-foreground'
         }`}>
