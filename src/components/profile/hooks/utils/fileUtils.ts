@@ -57,3 +57,21 @@ export function handleRemovePhoto(
     };
   });
 }
+
+// New helper function to convert blob URLs to base64
+export async function convertBlobToBase64(blobUrl: string): Promise<string> {
+  try {
+    const response = await fetch(blobUrl);
+    const blob = await response.blob();
+    
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.error("Error converting blob to base64:", error);
+    return blobUrl; // Return original URL if conversion fails
+  }
+}

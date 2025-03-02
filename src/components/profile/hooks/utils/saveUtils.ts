@@ -1,7 +1,8 @@
 
 import { PhotoManagementState, PhotoManagementHandlers } from '../types/photoManagementTypes';
+import { convertBlobToBase64 } from './fileUtils';
 
-export function handleSavePhotos(
+export async function handleSavePhotos(
   state: PhotoManagementState,
   handlers: PhotoManagementHandlers,
   setState: React.Dispatch<React.SetStateAction<PhotoManagementState>>,
@@ -32,27 +33,41 @@ export function handleSavePhotos(
     }
 
     if (typeof onPhotosAdded === 'function') {
-      // Make sure we're passing the actual file URLs to the handler
-      console.log("Calling onPhotosAdded with:", previewUrls);
-      onPhotosAdded(previewUrls);
-      
-      // Clean up object URLs after successful upload
-      setTimeout(() => {
-        previewUrls.forEach(url => {
-          try {
-            URL.revokeObjectURL(url);
-          } catch (e) {
-            console.error("Error revoking URL:", e);
-          }
+      try {
+        // Convert all blob URLs to base64
+        const base64Images = await Promise.all(
+          previewUrls.map(url => convertBlobToBase64(url))
+        );
+        
+        // Make sure we're passing the processed URLs to the handler
+        console.log("Calling onPhotosAdded with processed images");
+        onPhotosAdded(base64Images);
+        
+        // Clean up object URLs after successful upload
+        setTimeout(() => {
+          previewUrls.forEach(url => {
+            try {
+              URL.revokeObjectURL(url);
+            } catch (e) {
+              console.error("Error revoking URL:", e);
+            }
+          });
+        }, 1000);
+        
+        setState(prev => ({
+          ...prev,
+          isOpen: false,
+          selectedFiles: [],
+          previewUrls: []
+        }));
+      } catch (error) {
+        console.error("Error processing images:", error);
+        toast({
+          title: "Error processing images",
+          description: "Failed to process images for upload.",
+          variant: "destructive"
         });
-      }, 1000);
-      
-      setState(prev => ({
-        ...prev,
-        isOpen: false,
-        selectedFiles: [],
-        previewUrls: []
-      }));
+      }
     } else {
       console.error("Photo upload handler not available");
       toast({

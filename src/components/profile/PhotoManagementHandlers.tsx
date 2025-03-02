@@ -48,7 +48,10 @@ const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ chil
         .update({ images: updatedImages })
         .eq('id', authUser.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error updating images:", error);
+        throw error;
+      }
       
       // Update local state
       setUser({
@@ -90,7 +93,10 @@ const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ chil
         .update({ images: reorderedPhotos })
         .eq('id', authUser.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error reordering images:", error);
+        throw error;
+      }
       
       setUser({
         ...user,
@@ -141,7 +147,10 @@ const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ chil
         .update({ images: updatedImages })
         .eq('id', authUser.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error deleting image:", error);
+        throw error;
+      }
       
       setUser({
         ...user,
