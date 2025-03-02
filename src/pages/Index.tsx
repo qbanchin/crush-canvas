@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import TinderCard from '@/components/TinderCard';
@@ -6,27 +7,6 @@ import HeaderBar from '@/components/HeaderBar';
 import NavBar from '@/components/NavBar';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile } from '@/data/profiles';
-
-const specificProfiles: Profile[] = [
-  {
-    id: "ana-profile-id",
-    name: "Ana",
-    age: 28,
-    distance: 3,
-    bio: "Hi! I'm Ana. I love hiking, photography, and trying new foods.",
-    images: ["/lovable-uploads/045f4838-7fe0-4265-943a-0d7ba5dec7de.png"],
-    tags: ["Photography", "Hiking", "Foodie", "Travel"]
-  },
-  {
-    id: "michael-profile-id",
-    name: "Michael Jui",
-    age: 32,
-    distance: 5,
-    bio: "Software engineer with a passion for music and outdoor activities.",
-    images: ["/lovable-uploads/290973f2-f16b-4e56-8cfe-afb3b85e2239.png"],
-    tags: ["Technology", "Music", "Nature", "Programming"]
-  }
-];
 
 const Index = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -46,8 +26,8 @@ const Index = () => {
       return null;
     };
 
-    // Set our specific profiles instead of fetching
-    const loadProfiles = async () => {
+    // Fetch profiles from the backend
+    const fetchProfiles = async () => {
       try {
         setLoading(true);
         const userId = await getCurrentUser();
@@ -59,9 +39,71 @@ const Index = () => {
           return;
         }
 
-        console.log(`Loaded ${specificProfiles.length} specific profiles`);
-        setProfiles(specificProfiles);
+        // First, fetch the user's own profile for gender and preference
+        const { data: userProfile, error: userProfileError } = await supabase
+          .from('cards')
+          .select('gender, preference')
+          .eq('id', userId)
+          .maybeSingle();
         
+        if (userProfileError) {
+          console.error("Error fetching user profile:", userProfileError);
+          toast.error("Failed to load user preferences");
+          // Continue without filtering by gender preference
+        }
+        
+        // Handle the case where gender or preference might be null
+        const userGender = userProfile?.gender || null;
+        const genderPreference = userProfile?.preference || null;
+        
+        console.log("User gender:", userGender, "Preference:", genderPreference);
+
+        // Fetch all existing connections and rejected profiles
+        const { data: connectionsData, error: connectionsError } = await supabase.functions.invoke('get-matches');
+        
+        if (connectionsError) {
+          console.error("Error fetching connections:", connectionsError);
+          toast.error("Failed to load match data");
+        }
+        
+        // Extract connection IDs and rejected profile IDs
+        const connectionIds: string[] = [];
+        const rejectedIds: string[] = [];
+        
+        if (connectionsData && Array.isArray(connectionsData)) {
+          connectionsData.forEach((connection: any) => {
+            // If is_match is true, it's a connection, otherwise it was rejected
+            if (connection.is_match) {
+              connectionIds.push(connection.liked_user_id);
+            } else {
+              rejectedIds.push(connection.liked_user_id);
+            }
+          });
+        }
+        
+        // Now fetch profiles, filtering out connections and rejected ones on the server
+        const { data, error } = await supabase.functions.invoke('get-cards', {
+          body: {
+            excludeIds: [...connectionIds, ...rejectedIds],
+            genderPreference: genderPreference,
+            userGender: userGender
+          }
+        });
+        
+        if (error) {
+          console.error("Error fetching profiles:", error);
+          toast.error("Failed to load profiles");
+          setLoading(false);
+          return;
+        }
+        
+        if (data && Array.isArray(data)) {
+          console.log(`Loaded ${data.length} profiles, excluded ${connectionIds.length} connections and ${rejectedIds.length} rejected profiles`);
+          setProfiles(data);
+        } else {
+          console.error("No profiles data returned or invalid format");
+          setProfiles([]);
+        }
       } catch (error) {
         console.error("Error:", error);
         toast.error("Something went wrong");
@@ -70,7 +112,7 @@ const Index = () => {
       }
     };
 
-    loadProfiles();
+    fetchProfiles();
   }, []);
 
   const handleSwipe = async (direction: 'left' | 'right') => {
