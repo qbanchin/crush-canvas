@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -14,7 +15,7 @@ import {
   DialogDescription
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import ConnectionChat from '@/components/ConnectionChat';
 
 const MatchesPage = () => {
   const navigate = useNavigate();
@@ -23,9 +24,7 @@ const MatchesPage = () => {
   const [currentUserID, setCurrentUserID] = useState("temp-user-id"); // Will be replaced with auth user ID later
   const [useTestData, setUseTestData] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
-  const [messageDialogOpen, setMessageDialogOpen] = useState(false);
-  const [messageText, setMessageText] = useState('');
-  const [sendingMessage, setSendingMessage] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
 
   useEffect(() => {
     const fetchConnections = async () => {
@@ -82,57 +81,18 @@ const MatchesPage = () => {
     const profile = connections.find(p => p.id === profileId);
     if (profile) {
       setSelectedProfile(profile);
-      // We no longer show a toast, instead we open the profile dialog
     }
   };
 
-  const handleOpenMessageDialog = () => {
+  const handleOpenChat = () => {
     if (selectedProfile) {
-      setMessageDialogOpen(true);
+      setChatOpen(true);
     }
   };
 
-  const handleCloseMessageDialog = () => {
-    setMessageDialogOpen(false);
-    setMessageText('');
-  };
-
-  const handleSendMessage = async () => {
-    if (!messageText.trim() || !selectedProfile) {
-      return;
-    }
-
-    setSendingMessage(true);
-
-    try {
-      // In a real app, this would send the message to your backend
-      if (!useTestData) {
-        // Try to use Supabase function
-        const { data, error } = await supabase.functions.invoke('send-message', {
-          body: { 
-            userId: currentUserID,
-            recipientId: selectedProfile.id,
-            message: messageText
-          }
-        });
-        
-        if (error) {
-          console.error("Error sending message:", error);
-          throw new Error("Failed to send message");
-        }
-      } else {
-        // Just simulate a delay for test data
-        await new Promise(resolve => setTimeout(resolve, 800));
-      }
-      
-      toast.success(`Message sent to ${selectedProfile.name}`);
-      handleCloseMessageDialog();
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("Failed to send message");
-    } finally {
-      setSendingMessage(false);
-    }
+  const handleMessageSent = () => {
+    // This is called when a message is sent successfully
+    // We could use this to refresh connections if needed
   };
 
   return (
@@ -220,52 +180,25 @@ const MatchesPage = () => {
             
             <DialogFooter className="sm:justify-start">
               <Button 
-                onClick={handleOpenMessageDialog}
+                onClick={handleOpenChat}
                 className="w-full sm:w-auto"
               >
-                Send Message
+                Open Chat
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       )}
 
-      {/* Message Dialog */}
-      <Dialog open={messageDialogOpen} onOpenChange={setMessageDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Send Message to {selectedProfile?.name}</DialogTitle>
-            <DialogDescription>
-              Start a conversation with your connection.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid gap-4 py-4">
-            <Textarea
-              placeholder="Write your message here..."
-              value={messageText}
-              onChange={(e) => setMessageText(e.target.value)}
-              className="min-h-[100px]"
-            />
-          </div>
-          
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={handleCloseMessageDialog}
-              disabled={sendingMessage}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSendMessage}
-              disabled={!messageText.trim() || sendingMessage}
-            >
-              {sendingMessage ? "Sending..." : "Send Message"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Chat Dialog */}
+      <ConnectionChat 
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        connection={selectedProfile}
+        currentUserId={currentUserID}
+        useTestData={useTestData}
+        onMessageSent={handleMessageSent}
+      />
     </div>
   );
 };
