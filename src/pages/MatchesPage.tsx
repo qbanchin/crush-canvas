@@ -1,11 +1,10 @@
-
 import React, { useContext } from 'react';
 import HeaderBar from '@/components/HeaderBar';
 import NavBar from '@/components/NavBar';
 import ConnectionList from '@/components/matches/ConnectionList';
 import ProfileDialog from '@/components/matches/ProfileDialog';
 import ConnectionChat from '@/components/ConnectionChat';
-import { useConnectionsData } from '@/components/matches/useConnectionsData';
+import { useConnectionsData } from '@/hooks/connections/useConnectionsData';
 import { useDialogsState } from '@/components/matches/useDialogsState';
 import ConnectionsHeader from '@/components/matches/ConnectionsHeader';
 
