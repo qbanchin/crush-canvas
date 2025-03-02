@@ -1,6 +1,6 @@
 
 import { Profile } from '@/data/profiles';
-import { ImageIcon, MessageSquare } from 'lucide-react';
+import { ImageIcon, MessageCircle } from 'lucide-react';
 
 interface ConnectionListProps {
   connections: Profile[];
@@ -38,7 +38,7 @@ const ConnectionList = ({ connections, loading, onProfileClick }: ConnectionList
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {connections.map((connection) => {
         const hasMultipleImages = connection.images && connection.images.length > 1;
-        const hasNewMessage = connection.hasNewMessage;
+        const hasNewMessage = connection.hasNewMessage; // Now TypeScript knows this is allowed
         
         return (
           <div 
@@ -68,7 +68,7 @@ const ConnectionList = ({ connections, loading, onProfileClick }: ConnectionList
               <div className="flex items-center gap-1">
                 <h3 className="font-medium">{connection.name}, {connection.age}</h3>
                 {hasNewMessage && (
-                  <MessageSquare size={14} className="text-green-500" />
+                  <MessageCircle size={14} className="fill-green-500 text-green-500" />
                 )}
               </div>
               <p className="text-sm text-muted-foreground truncate">{connection.bio || "No bio available"}</p>
