@@ -1,10 +1,15 @@
-
 import React from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { useProfileContext } from '@/contexts/ProfileContext';
 import ProfileContent from './ProfileContent';
 import ProfileContentHandlers from './ProfileContentHandlers';
+
+interface PhotoHandlerProps {
+  onPhotosAdded?: (newPhotos: string[]) => void;
+  onPhotosReordered?: (reorderedPhotos: string[]) => void;
+  onPhotoDeleted?: (index: number) => void;
+}
 
 const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { toast } = useToast();
@@ -141,25 +146,21 @@ const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  // Log the handlers to verify they're defined
   console.log("PhotoManagementHandlers - Handlers defined:", {
     handlePhotosAdded: !!handlePhotosAdded,
     handlePhotosReordered: !!handlePhotosReordered,
     handlePhotoDeleted: !!handlePhotoDeleted
   });
 
-  // Only clone element if it's a component that can accept these props
   const childrenWithProps = React.Children.map(children, child => {
     if (React.isValidElement(child)) {
-      // Check if child is ProfileContent or ProfileContentHandlers
       if (child.type === ProfileContent || child.type === ProfileContentHandlers) {
         return React.cloneElement(child, {
           onPhotosAdded: handlePhotosAdded,
-          onPhotosReordered: handlePhotosReordered, 
+          onPhotosReordered: handlePhotosReordered,
           onPhotoDeleted: handlePhotoDeleted
-        });
+        } as PhotoHandlerProps);
       }
-      // For other elements, just return them as is
       return child;
     }
     return child;
