@@ -17,19 +17,21 @@ export const useChat = (
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const messageIdCounterRef = useRef(0);
+  const hasLoadedMessagesRef = useRef(false);
+
+  // Reset messages when connection changes or dialog closes
+  useEffect(() => {
+    if (!open) {
+      setMessages([]);
+      hasLoadedMessagesRef.current = false;
+    }
+  }, [open]);
 
   // Fetch messages when the dialog opens and connection exists
   useEffect(() => {
-    if (open && connection) {
+    if (open && connection && !hasLoadedMessagesRef.current) {
       fetchMessages();
     }
-    
-    // Reset message state when connection changes or dialog closes
-    return () => {
-      if (!open) {
-        setMessages([]);
-      }
-    };
   }, [open, connection?.id]);
 
   const fetchMessages = async () => {
@@ -37,6 +39,8 @@ export const useChat = (
     
     setLoading(true);
     try {
+      hasLoadedMessagesRef.current = true;
+      
       if (!useTestData) {
         // Try to fetch real messages from Supabase
         const { data, error } = await supabase.functions.invoke('get-messages', {
@@ -127,10 +131,12 @@ export const useChat = (
         isFromCurrentUser: true
       };
 
-      // Update local state immediately for better UX
-      setMessages(prevMessages => [...prevMessages, newMessage]);
+      // Add new message to state immediately - important for UI feedback
+      setMessages(prev => [...prev, newMessage]);
+      
+      // Clear input immediately for better UX
       const sentMessageText = messageText.trim();
-      setMessageText(''); // Clear input immediately for better UX
+      setMessageText('');
       
       // In a real app, this would send the message to your backend
       if (!useTestData) {
@@ -150,9 +156,16 @@ export const useChat = (
 
         console.log("Message sent successfully", data);
         
-        // If successful, refresh messages to get the properly saved message
-        await new Promise(resolve => setTimeout(resolve, 300));
-        await fetchMessages();
+        // Replace the temporary message with the real one from the server
+        if (data && data.id) {
+          setMessages(prev => prev.map(msg => 
+            msg.id === tempMessageId ? {
+              ...data,
+              isFromCurrentUser: true,
+              timestamp: new Date(data.timestamp)
+            } : msg
+          ));
+        }
       } else {
         // Just simulate a delay for test data
         await new Promise(resolve => setTimeout(resolve, 500));

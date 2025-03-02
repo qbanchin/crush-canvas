@@ -14,7 +14,7 @@ const MessageBubble = ({ message }: MessageBubbleProps) => {
   const formattedTime = message.timestamp ? formatChatDate(message.timestamp) : '';
   
   return (
-    <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-2 animate-in fade-in-50 duration-100`}>
+    <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-3 animate-in fade-in-50 duration-100`}>
       <div 
         className={`max-w-[80%] rounded-lg p-3 shadow-sm ${
           isCurrentUser 

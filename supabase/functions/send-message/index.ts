@@ -42,14 +42,16 @@ serve(async (req) => {
     //     content: message,
     //   })
     
+    // Generate a unique ID for the message
+    const messageId = `sent-${Date.now()}-${Math.floor(Math.random() * 10000)}`
+    
     // For now, we'll just simulate a successful message send
     const data = {
-      id: `sent-${Date.now()}`,
+      id: messageId,
       senderId: userId,
       recipientId: recipientId,
       content: message,
       timestamp: new Date().toISOString(),
-      isFromCurrentUser: true
     }
 
     // Return a success response with the new message
