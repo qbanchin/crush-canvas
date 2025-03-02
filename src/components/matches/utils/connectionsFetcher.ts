@@ -38,10 +38,12 @@ export const fetchConnections = async (
       } else if (data && Array.isArray(data)) {
         console.log("Connections loaded:", data.length);
         
-        // Map the data to include hasNewMessage flag
+        // Map the data to include hasNewMessage flag and isNewConnection
+        // In a real app, you would determine new connections based on their creation timestamp
         return data.map(connection => ({
           ...connection,
-          hasNewMessage: unreadMessages[connection.id] || false
+          hasNewMessage: unreadMessages[connection.id] || false,
+          isNewConnection: Math.random() > 0.7 // Randomly mark some as new for demo
         }));
       }
     } catch (err) {
@@ -61,7 +63,8 @@ export const fetchConnections = async (
         .slice(0, 3)
         .map(profile => ({
           ...profile,
-          hasNewMessage: unreadMessages[profile.id] || false
+          hasNewMessage: unreadMessages[profile.id] || false,
+          isNewConnection: Math.random() > 0.7 // Randomly mark some as new for demo
         }));
       
       resolve(testConnections);
