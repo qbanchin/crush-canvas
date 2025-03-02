@@ -15,10 +15,10 @@ const MessageList = ({ messages, loading }: MessageListProps) => {
   // Force scroll to bottom whenever messages change
   useEffect(() => {
     if (messagesEndRef.current) {
-      // Use scrollIntoView with a slight delay to ensure DOM updates are complete
+      // More reliable scrolling - ensures DOM updates are complete
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+      }, 150);
     }
   }, [messages]); // Watch the entire messages array for any changes
 
@@ -47,8 +47,11 @@ const MessageList = ({ messages, loading }: MessageListProps) => {
   
   return (
     <div ref={messagesContainerRef} className="space-y-4 pb-2">
-      {messages.map((message) => (
-        <MessageBubble key={`${message.id}-${message.timestamp}`} message={message} />
+      {messages.map((message, index) => (
+        <MessageBubble 
+          key={`${message.id}-${index}`} 
+          message={message} 
+        />
       ))}
       <div ref={messagesEndRef} className="h-[1px]" />
     </div>

@@ -19,7 +19,7 @@ export const useChat = (
   const messageIdCounterRef = useRef(0);
   const hasLoadedMessagesRef = useRef(false);
 
-  // Reset messages when connection changes or dialog closes
+  // Reset messages when dialog closes
   useEffect(() => {
     if (!open) {
       setMessages([]);
@@ -27,9 +27,10 @@ export const useChat = (
     }
   }, [open]);
 
-  // Fetch messages when the dialog opens and connection exists
+  // Fetch messages when connection changes and dialog is open
   useEffect(() => {
     if (open && connection && !hasLoadedMessagesRef.current) {
+      console.log("Fetching messages for connection:", connection.name);
       fetchMessages();
     }
   }, [open, connection?.id]);

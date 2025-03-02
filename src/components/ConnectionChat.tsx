@@ -1,6 +1,5 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Profile } from '@/data/profiles';
 import { useChat } from '@/hooks/useChat';
 import MessageList from './chat/MessageList';
 import MessageInput from './chat/MessageInput';

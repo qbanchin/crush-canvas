@@ -1,40 +1,42 @@
 
+// Follow this setup guide to integrate the Deno language server with your editor:
+// https://deno.land/manual/getting_started/setup_your_environment
+// This enables autocomplete, go to definition, etc.
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+console.log("Hello from Functions!")
+
 serve(async (req) => {
-  // Handle CORS preflight requests
+  // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, {
+      headers: corsHeaders,
+      status: 200,
+    })
   }
-
+  
   try {
-    // Create a Supabase client with the Auth context of the function
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
-    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY') || ''
-    const supabase = createClient(supabaseUrl, supabaseKey)
-
-    // Get the request body
+    // Parse request body
     const { userId, recipientId, message } = await req.json()
-
-    // Validate inputs
+    
     if (!userId || !recipientId || !message) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+          status: 400 
+        }
       )
     }
-
-    console.log(`User ${userId} sending message to ${recipientId}: ${message}`)
-
-    // In a real implementation, you would store the message in your database
-    // For example:
-    // const { data, error } = await supabase
+    
+    // In a real implementation, you would save the message to a database
+    // const { data, error } = await supabaseClient
     //   .from('messages')
     //   .insert({
     //     sender_id: userId,
@@ -43,7 +45,7 @@ serve(async (req) => {
     //   })
     
     // Generate a unique ID for the message
-    const messageId = `sent-${Date.now()}-${Math.floor(Math.random() * 10000)}`
+    const messageId = `sent-${Date.now()}`
     
     // For now, we'll just simulate a successful message send
     const data = {
@@ -58,19 +60,24 @@ serve(async (req) => {
     return new Response(
       JSON.stringify(data),
       { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      },
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        status: 200 
+      }
     )
   } catch (error) {
-    console.error('Error:', error)
-    
+    // Handle errors
     return new Response(
-      JSON.stringify({ error: 'Internal Server Error' }),
+      JSON.stringify({ error: error.message }),
       { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      },
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        status: 500 
+      }
     )
   }
 })
+
+// To invoke:
+// curl -i --location --request POST 'http://localhost:54321/functions/v1/send-message' \
+//   --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
+//   --header 'Content-Type: application/json' \
+//   --data '{"userId":"123", "recipientId":"456", "message":"Hello there!"}'
