@@ -4,10 +4,10 @@ import HeaderBar from '@/components/HeaderBar';
 import NavBar from '@/components/NavBar';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import SettingToggle from '@/components/settings/SettingToggle';
 
 const PrivacySettingsPage: React.FC = () => {
   const { toast } = useToast();
@@ -55,29 +55,19 @@ const PrivacySettingsPage: React.FC = () => {
               <section>
                 <h2 className="text-xl font-semibold mb-4">Activity Status</h2>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Show Online Status</p>
-                      <p className="text-sm text-muted-foreground">Allow others to see when you're online</p>
-                    </div>
-                    <Switch 
-                      checked={settings.showOnlineStatus} 
-                      onCheckedChange={() => handleToggle('showOnlineStatus')} 
-                    />
-                  </div>
+                  <SettingToggle
+                    title="Show Online Status"
+                    description="Allow others to see when you're online"
+                    checked={settings.showOnlineStatus}
+                    onToggle={() => handleToggle('showOnlineStatus')}
+                  />
                   
-                  <Separator />
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Show Last Active</p>
-                      <p className="text-sm text-muted-foreground">Allow others to see when you were last active</p>
-                    </div>
-                    <Switch 
-                      checked={settings.showLastActive} 
-                      onCheckedChange={() => handleToggle('showLastActive')} 
-                    />
-                  </div>
+                  <SettingToggle
+                    title="Show Last Active"
+                    description="Allow others to see when you were last active"
+                    checked={settings.showLastActive}
+                    onToggle={() => handleToggle('showLastActive')}
+                  />
                 </div>
               </section>
               
@@ -127,16 +117,13 @@ const PrivacySettingsPage: React.FC = () => {
                   
                   <Separator />
                   
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Allow Tagging</p>
-                      <p className="text-sm text-muted-foreground">Allow others to tag you in posts and photos</p>
-                    </div>
-                    <Switch 
-                      checked={settings.allowTags} 
-                      onCheckedChange={() => handleToggle('allowTags')} 
-                    />
-                  </div>
+                  <SettingToggle
+                    title="Allow Tagging"
+                    description="Allow others to tag you in posts and photos"
+                    checked={settings.allowTags}
+                    onToggle={() => handleToggle('allowTags')}
+                    showSeparator={false}
+                  />
                 </div>
               </section>
               

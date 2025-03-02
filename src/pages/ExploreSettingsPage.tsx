@@ -5,10 +5,8 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
-import { 
-  Switch
-} from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import SettingToggle from '@/components/settings/SettingToggle';
 
 const ExploreSettingsPage = () => {
   const navigate = useNavigate();
@@ -86,31 +84,20 @@ const ExploreSettingsPage = () => {
             
             {/* Other Settings */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <h4 className="font-medium">Show Verified Profiles Only</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Only see profiles that have been verified
-                  </p>
-                </div>
-                <Switch 
-                  checked={showVerifiedOnly} 
-                  onCheckedChange={setShowVerifiedOnly} 
-                />
-              </div>
+              <SettingToggle
+                title="Show Verified Profiles Only"
+                description="Only see profiles that have been verified"
+                checked={showVerifiedOnly}
+                onToggle={() => setShowVerifiedOnly(!showVerifiedOnly)}
+              />
               
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <h4 className="font-medium">Include Nearby Cities</h4>
-                  <p className="text-sm text-muted-foreground">
-                    See profiles from nearby locations
-                  </p>
-                </div>
-                <Switch 
-                  checked={includeNearby} 
-                  onCheckedChange={setIncludeNearby} 
-                />
-              </div>
+              <SettingToggle
+                title="Include Nearby Cities"
+                description="See profiles from nearby locations"
+                checked={includeNearby}
+                onToggle={() => setIncludeNearby(!includeNearby)}
+                showSeparator={false}
+              />
             </div>
             
             <Button 
