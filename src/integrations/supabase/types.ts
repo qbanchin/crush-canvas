@@ -15,9 +15,11 @@ export type Database = {
           bio: string | null
           created_at: string | null
           distance: number | null
+          gender: string | null
           id: string
           images: string[]
           name: string
+          preference: string | null
           tags: string[] | null
           updated_at: string | null
         }
@@ -26,9 +28,11 @@ export type Database = {
           bio?: string | null
           created_at?: string | null
           distance?: number | null
+          gender?: string | null
           id?: string
           images: string[]
           name: string
+          preference?: string | null
           tags?: string[] | null
           updated_at?: string | null
         }
@@ -37,9 +41,11 @@ export type Database = {
           bio?: string | null
           created_at?: string | null
           distance?: number | null
+          gender?: string | null
           id?: string
           images?: string[]
           name?: string
+          preference?: string | null
           tags?: string[] | null
           updated_at?: string | null
         }

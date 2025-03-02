@@ -46,8 +46,10 @@ const Index = () => {
         
         if (userProfileError) {
           console.error("Error fetching user profile:", userProfileError);
+          // Continue without filtering by gender preference
         }
         
+        // Handle the case where gender or preference might be null
         const userGender = userProfile?.gender || null;
         const genderPreference = userProfile?.preference || null;
         

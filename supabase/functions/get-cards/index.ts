@@ -49,7 +49,7 @@ serve(async (req) => {
       query = query.not('id', 'in', `(${excludeIds.join(',')})`);
     }
     
-    // Apply gender preference filtering
+    // Apply gender preference filtering if both preference and gender fields are provided
     if (genderPreference === 'male') {
       query = query.eq('gender', 'male');
     } else if (genderPreference === 'female') {
