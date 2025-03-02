@@ -20,13 +20,22 @@ const MatchesPage = () => {
   useEffect(() => {
     // Get current authenticated user
     const getCurrentUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (data?.user) {
-        setCurrentUserID(data.user.id);
-        return data.user.id;
+      try {
+        const { data } = await supabase.auth.getUser();
+        if (data?.user) {
+          setCurrentUserID(data.user.id);
+          return data.user.id;
+        }
+        // Fall back to test user id for development
+        const tempUserId = "temp-user-id";
+        setCurrentUserID(tempUserId);
+        return tempUserId;
+      } catch (error) {
+        console.error("Error getting current user:", error);
+        const tempUserId = "temp-user-id";
+        setCurrentUserID(tempUserId);
+        return tempUserId;
       }
-      // Fall back to test user id for development
-      return "temp-user-id";
     };
 
     const fetchConnections = async () => {
@@ -81,7 +90,7 @@ const MatchesPage = () => {
     };
 
     fetchConnections();
-  }, [currentUserID, useTestData]);
+  }, [useTestData]);
 
   const toggleTestData = () => {
     setUseTestData(prev => !prev);
@@ -99,6 +108,14 @@ const MatchesPage = () => {
   const handleOpenChat = () => {
     if (selectedProfile) {
       setChatOpen(true);
+    }
+  };
+
+  const handleChatClose = (open: boolean) => {
+    setChatOpen(open);
+    // If chat is closed and there was an error, reset selected profile
+    if (!open && !selectedProfile) {
+      setSelectedProfile(null);
     }
   };
 
@@ -140,14 +157,16 @@ const MatchesPage = () => {
       />
 
       {/* Chat Dialog */}
-      <ConnectionChat 
-        open={chatOpen}
-        onOpenChange={setChatOpen}
-        connection={selectedProfile}
-        currentUserId={currentUserID || ""}
-        useTestData={useTestData}
-        onMessageSent={handleMessageSent}
-      />
+      {currentUserID && (
+        <ConnectionChat 
+          open={chatOpen}
+          onOpenChange={handleChatClose}
+          connection={selectedProfile}
+          currentUserId={currentUserID}
+          useTestData={useTestData}
+          onMessageSent={handleMessageSent}
+        />
+      )}
     </div>
   );
 };

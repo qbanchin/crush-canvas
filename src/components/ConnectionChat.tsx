@@ -19,7 +19,7 @@ export interface Message {
   senderId: string;
   recipientId: string;
   content: string;
-  timestamp: Date;
+  timestamp: Date | string;
   isFromCurrentUser: boolean;
 }
 
@@ -45,7 +45,7 @@ const ConnectionChat = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch messages when the dialog opens
+  // Fetch messages when the dialog opens and connection exists
   useEffect(() => {
     if (open && connection) {
       fetchMessages();
@@ -86,28 +86,27 @@ const ConnectionChat = ({
   };
 
   const loadTestMessages = () => {
+    if (!connection) return;
+    
     // Generate some test messages for demo purposes
     const testMessages: Message[] = [
       {
         id: '1',
         senderId: currentUserId,
-        recipientId: connection?.id || '',
+        recipientId: connection.id,
         content: 'Hey there! How are you?',
         timestamp: new Date(Date.now() - 86400000), // 1 day ago
         isFromCurrentUser: true
-      }
-    ];
-    
-    if (connection) {
-      testMessages.push({
+      },
+      {
         id: '2',
         senderId: connection.id,
         recipientId: currentUserId,
         content: `Hi! I'm doing great. Your profile is interesting!`,
         timestamp: new Date(Date.now() - 43200000), // 12 hours ago
         isFromCurrentUser: false
-      });
-    }
+      }
+    ];
     
     setMessages(testMessages);
   };
@@ -165,21 +164,31 @@ const ConnectionChat = ({
     }
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: Date | string) => {
+    if (!date) return '';
+    
+    // Convert string to Date if needed
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    
+    // Check if date is valid
+    if (isNaN(dateObj.getTime())) {
+      return 'Invalid date';
+    }
+    
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
       hour: 'numeric',
       minute: 'numeric',
       hour12: true
-    }).format(date);
+    }).format(dateObj);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Chat with {connection?.name}</DialogTitle>
+          <DialogTitle>Chat with {connection?.name || 'Connection'}</DialogTitle>
           <DialogDescription>
             Your conversation history
           </DialogDescription>
