@@ -7,13 +7,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { Profile, profiles } from '@/data/profiles';
 
 const MatchesPage = () => {
-  const [matches, setMatches] = useState<Profile[]>([]);
+  const [connections, setConnections] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserID, setCurrentUserID] = useState("temp-user-id"); // Will be replaced with auth user ID later
   const [useTestData, setUseTestData] = useState(false);
 
   useEffect(() => {
-    const fetchMatches = async () => {
+    const fetchConnections = async () => {
       try {
         setLoading(true);
         
@@ -24,11 +24,11 @@ const MatchesPage = () => {
           });
           
           if (error) {
-            console.error("Error fetching matches:", error);
+            console.error("Error fetching connections:", error);
             toast.error("Using test data instead of backend");
             setUseTestData(true);
           } else if (data && Array.isArray(data)) {
-            setMatches(data);
+            setConnections(data);
             setLoading(false);
             return;
           }
@@ -38,12 +38,12 @@ const MatchesPage = () => {
         if (useTestData) {
           // Simulate a short loading delay for test data
           setTimeout(() => {
-            // Use 3 random profiles from the local data as matches
-            const testMatches = [...profiles]
+            // Use 3 random profiles from the local data as connections
+            const testConnections = [...profiles]
               .sort(() => 0.5 - Math.random())
               .slice(0, 3);
             
-            setMatches(testMatches);
+            setConnections(testConnections);
             setLoading(false);
           }, 800);
         }
@@ -54,7 +54,7 @@ const MatchesPage = () => {
       }
     };
 
-    fetchMatches();
+    fetchConnections();
   }, [currentUserID, useTestData]);
 
   const toggleTestData = () => {
@@ -86,20 +86,20 @@ const MatchesPage = () => {
               </div>
             ))}
           </div>
-        ) : matches.length > 0 ? (
+        ) : connections.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {matches.map((match) => (
+            {connections.map((connection) => (
               <div 
-                key={match.id} 
+                key={connection.id} 
                 className="flex flex-col border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow"
               >
                 <div 
                   className="h-40 bg-cover bg-center" 
-                  style={{ backgroundImage: `url(${match.images[0]})` }}
+                  style={{ backgroundImage: `url(${connection.images[0]})` }}
                 ></div>
                 <div className="p-3">
-                  <h3 className="font-medium">{match.name}, {match.age}</h3>
-                  <p className="text-sm text-muted-foreground truncate">{match.bio}</p>
+                  <h3 className="font-medium">{connection.name}, {connection.age}</h3>
+                  <p className="text-sm text-muted-foreground truncate">{connection.bio}</p>
                 </div>
               </div>
             ))}
