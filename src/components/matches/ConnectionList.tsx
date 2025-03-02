@@ -1,11 +1,10 @@
 
 import { Profile } from '@/data/profiles';
-import { ImageIcon, MessageCircle, Circle, UserPlus } from 'lucide-react';
+import { ImageIcon, MessageCircle, Circle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { ExtendedProfile } from './types/connectionTypes';
 
 interface ConnectionListProps {
-  connections: ExtendedProfile[];
+  connections: Profile[];
   loading: boolean;
   onProfileClick: (profileId: string) => void;
 }
@@ -41,7 +40,6 @@ const ConnectionList = ({ connections, loading, onProfileClick }: ConnectionList
       {connections.map((connection) => {
         const hasMultipleImages = connection.images && connection.images.length > 1;
         const hasNewMessage = connection.hasNewMessage;
-        const isNewConnection = connection.isNewConnection;
         
         return (
           <div 
@@ -68,17 +66,12 @@ const ConnectionList = ({ connections, loading, onProfileClick }: ConnectionList
             </div>
             
             <div className="p-3">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
+                <h3 className="font-medium">{connection.name}, {connection.age}</h3>
                 {hasNewMessage && (
                   <div className="relative flex items-center">
                     <span className="block h-2 w-2 rounded-full bg-green-500"></span>
                   </div>
-                )}
-                <h3 className="font-medium">{connection.name}, {connection.age}</h3>
-                {isNewConnection && (
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs py-0 px-2">
-                    New
-                  </Badge>
                 )}
               </div>
               <p className="text-sm text-muted-foreground truncate">{connection.bio || "No bio available"}</p>
