@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import HeaderBar from '@/components/HeaderBar';
 import NavBar from '@/components/NavBar';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -27,7 +28,6 @@ const ProfilePage = () => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Sample user data
   const [user, setUser] = useState({
     name: "Alex Morgan",
     age: 29,
@@ -39,38 +39,32 @@ const ProfilePage = () => {
     interests: ["Coffee", "Photography", "Hiking", "Music", "Travel"]
   });
 
-  // Photo management
   const [isAddingPhotos, setIsAddingPhotos] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Settings state
   const [showOnlineStatus, setShowOnlineStatus] = useState(true);
   const [showActivity, setShowActivity] = useState(true);
   const [distanceUnit, setDistanceUnit] = useState("km");
 
-  // State for editing
   const [editingBio, setEditingBio] = useState(false);
   const [editingInterests, setEditingInterests] = useState(false);
   const [tempBio, setTempBio] = useState(user.bio);
   const [newInterest, setNewInterest] = useState("");
   const [tempInterests, setTempInterests] = useState([...user.interests]);
 
-  // Photo management handlers
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const newFiles = Array.from(e.target.files);
       setSelectedFiles([...selectedFiles, ...newFiles]);
       
-      // Create preview URLs
       const newPreviewUrls = newFiles.map(file => URL.createObjectURL(file));
       setPreviewUrls([...previewUrls, ...newPreviewUrls]);
     }
   };
 
   const handleRemovePhoto = (index: number) => {
-    // Release the URL object to avoid memory leaks
     URL.revokeObjectURL(previewUrls[index]);
     
     const newPreviewUrls = [...previewUrls];
@@ -92,14 +86,11 @@ const ProfilePage = () => {
       return;
     }
 
-    // In a real app, you'd upload these files to a server
-    // For now, we'll just add the preview URLs to the user's images
     setUser({
       ...user,
       images: [...user.images, ...previewUrls]
     });
 
-    // Clean up state
     setSelectedFiles([]);
     setPreviewUrls([]);
     setIsAddingPhotos(false);
@@ -116,7 +107,6 @@ const ProfilePage = () => {
     }
   };
 
-  // Next/Previous image handlers
   const handlePrevImage = () => {
     setCurrentImageIndex((prev) => (prev === 0 ? user.images.length - 1 : prev - 1));
   };
@@ -125,7 +115,6 @@ const ProfilePage = () => {
     setCurrentImageIndex((prev) => (prev === user.images.length - 1 ? 0 : prev + 1));
   };
 
-  // Bio handlers
   const handleBioSave = () => {
     setUser({ ...user, bio: tempBio });
     setEditingBio(false);
@@ -140,7 +129,6 @@ const ProfilePage = () => {
     setEditingBio(false);
   };
 
-  // Interests handlers
   const handleInterestsSave = () => {
     setUser({ ...user, interests: tempInterests });
     setEditingInterests(false);
@@ -183,7 +171,6 @@ const ProfilePage = () => {
         <ScrollArea className="h-[calc(100vh-9rem)]">
           <div className="px-4 py-6">
             <div className="flex items-end relative mb-6">
-              {/* Profile image with carousel */}
               <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-background relative">
                 <div 
                   className="w-full h-full bg-cover bg-center" 
@@ -209,7 +196,6 @@ const ProfilePage = () => {
                 </div>
               </div>
               
-              {/* Settings button with dialog */}
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="icon" className="absolute top-0 right-0">
@@ -277,14 +263,12 @@ const ProfilePage = () => {
               </Dialog>
             </div>
             
-            {/* Profile controls */}
             <div className="flex gap-3 mb-8">
               <Button className="flex-1 gap-2">
                 <Edit size={16} />
                 Edit Profile
               </Button>
               
-              {/* Add Photos button with dialog */}
               <Dialog open={isAddingPhotos} onOpenChange={setIsAddingPhotos}>
                 <DialogTrigger asChild>
                   <Button variant="outline" className="flex-1 gap-2">
@@ -301,7 +285,6 @@ const ProfilePage = () => {
                   </DialogHeader>
                   
                   <div className="space-y-4 py-4">
-                    {/* Hidden file input */}
                     <input
                       type="file"
                       ref={fileInputRef}
@@ -311,7 +294,6 @@ const ProfilePage = () => {
                       onChange={handleFileSelect}
                     />
                     
-                    {/* File upload button */}
                     <Button 
                       variant="outline" 
                       className="w-full h-20 flex flex-col justify-center items-center gap-2"
@@ -321,7 +303,6 @@ const ProfilePage = () => {
                       <span>Select Photos</span>
                     </Button>
                     
-                    {/* Preview area */}
                     {previewUrls.length > 0 && (
                       <div className="mt-4">
                         <h4 className="text-sm font-medium mb-2">Selected Photos ({previewUrls.length})</h4>
@@ -360,7 +341,6 @@ const ProfilePage = () => {
               </Dialog>
             </div>
             
-            {/* Bio section */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
                 <h3 className="font-semibold">About me</h3>
@@ -409,7 +389,6 @@ const ProfilePage = () => {
               )}
             </div>
             
-            {/* Interests section */}
             <div className="mb-8">
               <div className="flex justify-between items-center mb-2">
                 <h3 className="font-semibold">Interests</h3>
@@ -505,7 +484,6 @@ const ProfilePage = () => {
             
             <Separator className="my-6" />
             
-            {/* Settings links */}
             <div className="space-y-4">
               <SettingsLink title="Explore Settings" to="/settings/explore" />
               <SettingsLink title="Notification Settings" />
@@ -527,17 +505,19 @@ interface SettingsLinkProps {
 }
 
 const SettingsLink: React.FC<SettingsLinkProps> = ({ title, to }) => {
-  const handleClick = () => {
-    if (to) {
-      window.location.href = to;
-    }
-  };
-
+  if (to) {
+    return (
+      <Link to={to} className="block">
+        <div className="flex justify-between items-center p-3 rounded-lg hover:bg-muted/30 cursor-pointer transition-colors">
+          <span>{title}</span>
+          <ChevronRight size={18} className="text-muted-foreground" />
+        </div>
+      </Link>
+    );
+  }
+  
   return (
-    <div 
-      className="flex justify-between items-center p-3 rounded-lg hover:bg-muted/30 cursor-pointer transition-colors"
-      onClick={handleClick}
-    >
+    <div className="flex justify-between items-center p-3 rounded-lg hover:bg-muted/30 cursor-pointer transition-colors">
       <span>{title}</span>
       <ChevronRight size={18} className="text-muted-foreground" />
     </div>
