@@ -139,15 +139,26 @@ const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  // Log the handlers to verify they're defined
+  console.log("PhotoManagementHandlers - Handlers defined:", {
+    handlePhotosAdded: !!handlePhotosAdded,
+    handlePhotosReordered: !!handlePhotosReordered,
+    handlePhotoDeleted: !!handlePhotoDeleted
+  });
+
   return (
     <>
       {React.Children.map(children, child => {
         if (React.isValidElement(child)) {
-          return React.cloneElement(child, {
+          // Pass the handlers to the children explicitly
+          const childProps = {
+            ...child.props,
             onPhotosAdded: handlePhotosAdded,
             onPhotosReordered: handlePhotosReordered,
             onPhotoDeleted: handlePhotoDeleted
-          } as any);
+          };
+          
+          return React.cloneElement(child, childProps);
         }
         return child;
       })}

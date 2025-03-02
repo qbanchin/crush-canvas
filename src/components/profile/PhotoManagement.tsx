@@ -31,10 +31,12 @@ const PhotoManagement: React.FC<PhotoManagementProps> = ({
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
+  // Log the handlers with more detailed information
   console.log('PhotoManagement component with handlers:', {
     hasAddHandler: !!onPhotosAdded,
     hasReorderHandler: !!onPhotosReordered,
-    hasDeleteHandler: !!onPhotoDeleted
+    hasDeleteHandler: !!onPhotoDeleted,
+    userImagesCount: userImages?.length || 0
   });
 
   const handleOpenDialog = () => {

@@ -19,6 +19,13 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   onPhotosReordered,
   onPhotoDeleted
 }) => {
+  // Log the handlers to verify they're being passed correctly
+  console.log("ActionButtons - Handlers received:", {
+    hasAddHandler: !!onPhotosAdded,
+    hasReorderHandler: !!onPhotosReordered,
+    hasDeleteHandler: !!onPhotoDeleted
+  });
+  
   return (
     <div className="flex gap-3 mb-8">
       <Button className="flex-1 gap-2" onClick={onEditProfile}>
