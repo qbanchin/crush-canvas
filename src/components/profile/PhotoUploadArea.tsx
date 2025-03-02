@@ -5,9 +5,13 @@ import { Button } from '@/components/ui/button';
 
 interface PhotoUploadAreaProps {
   onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  multiple?: boolean;
 }
 
-const PhotoUploadArea: React.FC<PhotoUploadAreaProps> = ({ onFileSelect }) => {
+const PhotoUploadArea: React.FC<PhotoUploadAreaProps> = ({ 
+  onFileSelect,
+  multiple = true 
+}) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleTriggerFileInput = () => {
@@ -23,7 +27,7 @@ const PhotoUploadArea: React.FC<PhotoUploadAreaProps> = ({ onFileSelect }) => {
         ref={fileInputRef}
         className="hidden"
         accept="image/*"
-        multiple
+        multiple={multiple}
         onChange={onFileSelect}
       />
       

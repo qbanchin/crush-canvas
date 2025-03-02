@@ -146,24 +146,19 @@ const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ chil
     handlePhotoDeleted: !!handlePhotoDeleted
   });
 
-  return (
-    <>
-      {React.Children.map(children, child => {
-        if (React.isValidElement(child)) {
-          // Pass the handlers to the children explicitly
-          const childProps = {
-            ...child.props,
-            onPhotosAdded: handlePhotosAdded,
-            onPhotosReordered: handlePhotosReordered,
-            onPhotoDeleted: handlePhotoDeleted
-          };
-          
-          return React.cloneElement(child, childProps);
-        }
-        return child;
-      })}
-    </>
-  );
+  // Create a new children with the handlers properly passed
+  const childrenWithProps = React.Children.map(children, child => {
+    if (React.isValidElement(child)) {
+      return React.cloneElement(child, {
+        onPhotosAdded: handlePhotosAdded,
+        onPhotosReordered: handlePhotosReordered, 
+        onPhotoDeleted: handlePhotoDeleted
+      });
+    }
+    return child;
+  });
+  
+  return <>{childrenWithProps}</>;
 };
 
 export default PhotoManagementHandlers;

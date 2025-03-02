@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Separator } from '@/components/ui/separator';
 import ProfileHeader from '@/components/profile/ProfileHeader';
@@ -17,6 +18,7 @@ const ProfileContent: React.FC<{
   onEditProfile?: () => void;
   onPhotosAdded?: (newPhotos: string[]) => void;
   onPhotosReordered?: (reorderedPhotos: string[]) => void;
+  onPhotoDeleted?: (index: number) => void;
 }> = ({
   handlePrevImage,
   handleNextImage,
@@ -25,7 +27,8 @@ const ProfileContent: React.FC<{
   onInterestsSave,
   onEditProfile,
   onPhotosAdded,
-  onPhotosReordered
+  onPhotosReordered,
+  onPhotoDeleted
 }) => {
   const {
     user,
@@ -38,6 +41,13 @@ const ProfileContent: React.FC<{
     distanceUnit,
     setDistanceUnit
   } = useProfileContext();
+
+  // Log handlers to verify they're defined at this level
+  console.log('ProfileContent - Handlers defined:', {
+    onPhotosAdded: !!onPhotosAdded,
+    onPhotosReordered: !!onPhotosReordered,
+    onPhotoDeleted: !!onPhotoDeleted || !!handleDeleteImage
+  });
 
   if (loading) {
     return (
@@ -77,7 +87,7 @@ const ProfileContent: React.FC<{
         userImages={user.images}
         onPhotosAdded={onPhotosAdded}
         onPhotosReordered={onPhotosReordered}
-        onPhotoDeleted={handleDeleteImage}
+        onPhotoDeleted={onPhotoDeleted || handleDeleteImage}
       />
       
       <BioEditor 
