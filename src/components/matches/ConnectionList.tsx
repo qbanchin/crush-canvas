@@ -69,12 +69,12 @@ const ConnectionList = ({ connections, loading, onProfileClick }: ConnectionList
             
             <div className="p-3">
               <div className="flex items-center gap-2">
-                <h3 className="font-medium">{connection.name}, {connection.age}</h3>
                 {hasNewMessage && (
                   <div className="relative flex items-center">
                     <span className="block h-2 w-2 rounded-full bg-green-500"></span>
                   </div>
                 )}
+                <h3 className="font-medium">{connection.name}, {connection.age}</h3>
                 {isNewConnection && (
                   <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs py-0 px-2">
                     New
