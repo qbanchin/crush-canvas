@@ -85,9 +85,11 @@ export function useConnectionsData() {
               .slice(0, 3)
               .map(profile => ({
                 ...profile,
-                hasNewMessage: unreadMessages[profile.id] || false
+                // For testing, mark one profile randomly as having a new message
+                hasNewMessage: profile.id === profiles[0].id ? true : unreadMessages[profile.id] || false
               }));
             
+            console.log("Test connections with message indicators:", testConnections);
             setConnections(testConnections);
             setLoading(false);
           }, 800);
@@ -143,20 +145,22 @@ export function useConnectionsData() {
             const randomIndex = Math.floor(Math.random() * connections.length);
             const randomConnection = connections[randomIndex];
             
-            console.log("Simulating new message from:", randomConnection.name);
+            console.log("Simulating new message from:", randomConnection?.name);
             
-            setUnreadMessages(prev => ({
-              ...prev,
-              [randomConnection.id]: true
-            }));
-            
-            setConnections(currentConnections => 
-              currentConnections.map(conn => 
-                conn.id === randomConnection.id 
-                  ? { ...conn, hasNewMessage: true } 
-                  : conn
-              )
-            );
+            if (randomConnection) {
+              setUnreadMessages(prev => ({
+                ...prev,
+                [randomConnection.id]: true
+              }));
+              
+              setConnections(currentConnections => 
+                currentConnections.map(conn => 
+                  conn.id === randomConnection.id 
+                    ? { ...conn, hasNewMessage: true } 
+                    : conn
+                )
+              );
+            }
           }
         }, 5000);
       }
