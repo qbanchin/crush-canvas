@@ -13,7 +13,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
   // Determine the title based on the current route
   let title = "Discover";
   if (location.pathname === "/matches") {
-    title = "Matches";
+    title = "Connections";
   } else if (location.pathname === "/profile") {
     title = "Profile";
   }
