@@ -12,6 +12,7 @@ const AuthPage = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -19,13 +20,40 @@ const AuthPage = () => {
     setLoading(true);
     
     try {
-      const { error } = await supabase.auth.signUp({
+      if (!name.trim()) {
+        throw new Error("Please enter your name");
+      }
+
+      // Sign up the user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
       });
       
-      if (error) throw error;
-      toast.success('Sign up successful! Please check your email.');
+      if (authError) throw authError;
+
+      // If sign up was successful, create a profile for the user
+      if (authData?.user) {
+        // Create a profile in the cards table
+        const { error: profileError } = await supabase
+          .from('cards')
+          .insert({
+            id: authData.user.id,
+            name: name,
+            age: 25, // Default age that can be updated in profile
+            bio: "New to Single Expats",
+            images: ["/placeholder.svg"], // Default placeholder image
+            tags: ["New User"],
+            distance: 0
+          });
+
+        if (profileError) {
+          console.error("Failed to create profile:", profileError);
+          toast.error("Account created but profile setup failed. Please contact support.");
+        } else {
+          toast.success('Account created successfully! Please check your email for verification.');
+        }
+      }
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -107,6 +135,18 @@ const AuthPage = () => {
           
           <TabsContent value="signup">
             <form onSubmit={handleSignUp} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input 
+                  id="name" 
+                  type="text" 
+                  placeholder="Your Name" 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="signup-email">Email</Label>
                 <Input 
