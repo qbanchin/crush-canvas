@@ -23,7 +23,7 @@ const NavBar: React.FC<NavBarProps> = ({ className }) => {
         end
       >
         <Flame size={24} />
-        <span>Discover</span>
+        <span>Explore</span>
       </NavLink>
       
       <NavLink 
