@@ -145,6 +145,8 @@ export const useChat = (
           throw new Error("Failed to send message");
         }
 
+        console.log("Message sent successfully");
+        
         // If successful, refresh messages to get the properly saved message
         await new Promise(resolve => setTimeout(resolve, 300));
         fetchMessages();
