@@ -1,35 +1,35 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Profile } from '@/data/profiles';
 
 export function useDialogsState() {
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
 
-  const handleProfileClick = (profileId: string, connections: Profile[]) => {
+  const handleProfileClick = useCallback((profileId: string, connections: Profile[]) => {
     // Find the profile in connections
     const profile = connections.find(p => p.id === profileId);
     if (profile) {
       setSelectedProfile(profile);
     }
-  };
+  }, []);
 
-  const handleOpenChat = () => {
+  const handleOpenChat = useCallback(() => {
     if (selectedProfile) {
       setChatOpen(true);
     }
-  };
+  }, [selectedProfile]);
 
-  const handleChatClose = (open: boolean) => {
+  const handleChatClose = useCallback((open: boolean) => {
     setChatOpen(open);
     // We keep the selected profile even when chat is closed
     // so that users can reopen the chat with the same profile
-  };
+  }, []);
 
-  const handleMessageSent = () => {
+  const handleMessageSent = useCallback(() => {
     // This is called when a message is sent successfully
-    // We could use this to refresh connections if needed
     console.log("Message sent successfully");
-  };
+    // Keep the chat open after sending a message
+  }, []);
 
   return {
     selectedProfile,

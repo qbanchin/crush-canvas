@@ -5,7 +5,7 @@ import { useChat } from '@/hooks/useChat';
 import MessageList from './chat/MessageList';
 import MessageInput from './chat/MessageInput';
 import { ChatProps } from '@/types/message.types';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 const ConnectionChat = ({ 
   open, 
@@ -23,6 +23,15 @@ const ConnectionChat = ({
     loading,
     handleSendMessage
   } = useChat(connection, currentUserId, useTestData, onMessageSent, open);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    if (open && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, open]);
 
   // Auto-focus the textarea when the dialog opens
   useEffect(() => {
@@ -46,8 +55,9 @@ const ConnectionChat = ({
           </DialogDescription>
         </DialogHeader>
         
-        <div className="flex-1 overflow-y-auto py-4 space-y-4">
+        <div className="flex-1 overflow-y-auto py-4 px-1">
           <MessageList messages={messages} loading={loading} />
+          <div ref={messagesEndRef} />
         </div>
         
         <MessageInput 

@@ -11,7 +11,7 @@ const MessageBubble = ({ message }: MessageBubbleProps) => {
   const isCurrentUser = message.isFromCurrentUser;
   
   return (
-    <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
+    <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-2`}>
       <div 
         className={`max-w-[80%] rounded-lg p-3 ${
           isCurrentUser 
