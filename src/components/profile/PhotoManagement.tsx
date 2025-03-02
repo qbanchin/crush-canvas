@@ -16,6 +16,13 @@ const PhotoManagement: React.FC<PhotoManagementProps> = ({
   onPhotosReordered,
   onPhotoDeleted
 }) => {
+  // Log to help with debugging
+  console.log('PhotoManagement received handlers:', { 
+    hasAddHandler: typeof onPhotosAdded === 'function',
+    hasReorderHandler: typeof onPhotosReordered === 'function',
+    hasDeleteHandler: typeof onPhotoDeleted === 'function'
+  });
+
   const {
     isDialogOpen,
     setIsDialogOpen,
@@ -40,23 +47,25 @@ const PhotoManagement: React.FC<PhotoManagementProps> = ({
   });
 
   return (
-    <PhotoManagementDialog
-      isOpen={isDialogOpen}
-      onOpenChange={setIsDialogOpen}
-      userImages={userImages}
-      onSave={handleSavePhotos}
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-      editablePhotos={editablePhotos}
-      previewUrls={previewUrls}
-      onDeleteExistingPhoto={handleDeleteExistingPhoto}
-      draggedIndex={draggedIndex}
-      onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
-      onDragEnd={handleDragEnd}
-      onFileSelect={handleFileSelect}
-      onRemovePhoto={handleRemovePhoto}
-    />
+    <>
+      <PhotoManagementDialog
+        isOpen={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        userImages={userImages}
+        onSave={handleSavePhotos}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        editablePhotos={editablePhotos}
+        previewUrls={previewUrls}
+        onDeleteExistingPhoto={handleDeleteExistingPhoto}
+        draggedIndex={draggedIndex}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+        onFileSelect={handleFileSelect}
+        onRemovePhoto={handleRemovePhoto}
+      />
+    </>
   );
 };
 

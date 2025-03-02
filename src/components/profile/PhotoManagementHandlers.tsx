@@ -134,8 +134,9 @@ const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  // Make sure we explicitly pass these handlers to all children
   return (
-    <div>
+    <>
       {React.Children.map(children, child => {
         if (React.isValidElement(child)) {
           return React.cloneElement(child, {
@@ -146,7 +147,7 @@ const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ chil
         }
         return child;
       })}
-    </div>
+    </>
   );
 };
 
