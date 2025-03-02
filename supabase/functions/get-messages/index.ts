@@ -33,6 +33,8 @@ serve(async (req) => {
       )
     }
     
+    console.log(`Fetching messages between ${userId} and ${recipientId}`)
+    
     // In a real implementation, you would fetch messages from a database
     // const { data, error } = await supabaseClient
     //   .from('messages')
@@ -76,7 +78,7 @@ serve(async (req) => {
       }
     ]
 
-    console.log("Messages loaded:", messages);
+    console.log("Messages loaded:", messages)
     
     // Return messages
     return new Response(
@@ -87,6 +89,8 @@ serve(async (req) => {
       }
     )
   } catch (error) {
+    console.error("Error in get-messages function:", error)
+    
     // Handle errors
     return new Response(
       JSON.stringify({ error: error.message }),
@@ -97,9 +101,3 @@ serve(async (req) => {
     )
   }
 })
-
-// To invoke:
-// curl -i --location --request POST 'http://localhost:54321/functions/v1/get-messages' \
-//   --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
-//   --header 'Content-Type: application/json' \
-//   --data '{"userId":"123", "recipientId":"456"}'

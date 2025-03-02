@@ -10,7 +10,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-console.log("Hello from Functions!")
+console.log("Hello from Send Message Function!")
 
 serve(async (req) => {
   // Handle CORS preflight request
@@ -44,8 +44,10 @@ serve(async (req) => {
     //     content: message,
     //   })
     
-    // Generate a unique ID for the message
-    const messageId = `sent-${Date.now()}`
+    // Generate a unique ID for the message with timestamp for better uniqueness
+    const messageId = `sent-${Date.now()}-${Math.floor(Math.random() * 10000)}`
+    
+    console.log(`Sending message: ${messageId} from ${userId} to ${recipientId}`)
     
     // For now, we'll just simulate a successful message send
     const data = {
@@ -65,6 +67,8 @@ serve(async (req) => {
       }
     )
   } catch (error) {
+    console.error("Error in send-message function:", error)
+    
     // Handle errors
     return new Response(
       JSON.stringify({ error: error.message }),
@@ -75,9 +79,3 @@ serve(async (req) => {
     )
   }
 })
-
-// To invoke:
-// curl -i --location --request POST 'http://localhost:54321/functions/v1/send-message' \
-//   --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
-//   --header 'Content-Type: application/json' \
-//   --data '{"userId":"123", "recipientId":"456", "message":"Hello there!"}'

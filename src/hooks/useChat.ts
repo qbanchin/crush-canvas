@@ -171,6 +171,14 @@ export const useChat = (
         // Just simulate a delay for test data
         await new Promise(resolve => setTimeout(resolve, 500));
         
+        // Replace the temporary message with a "confirmed" one
+        setMessages(prev => prev.map(msg => 
+          msg.id === tempMessageId ? {
+            ...msg,
+            id: `confirmed-${Date.now()}`
+          } : msg
+        ));
+        
         // Add a simulated response in test mode
         setTimeout(() => {
           const responseMessage: Message = {
