@@ -29,9 +29,9 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
             <img 
               src="/lovable-uploads/290973f2-f16b-4e56-8cfe-afb3b85e2239.png" 
               alt="Global Love" 
-              className="h-14 w-14 object-contain" 
+              className="h-14 w-14 object-contain mt-3" 
             />
-            <div className="text-sm font-semibold -mt-1">
+            <div className="text-sm font-semibold mt-2">
               <span className="text-secondary">Single</span>
               <span className="text-primary">Expats</span>
             </div>
