@@ -25,14 +25,21 @@ serve(async (req) => {
       }
     )
 
-    // Parse the request body to get the excludeIds
+    // Parse the request body
     let excludeIds: string[] = [];
+    let genderPreference: string | null = null;
+    let userGender: string | null = null;
+    
     if (req.method === 'POST') {
       const body = await req.json();
       excludeIds = body.excludeIds || [];
+      genderPreference = body.genderPreference || null;
+      userGender = body.userGender || null;
     }
 
-    // Get cards from the database
+    console.log(`Filtering with excludeIds: ${excludeIds.length}, preference: ${genderPreference}, userGender: ${userGender}`);
+
+    // Build the query
     let query = supabaseClient
       .from('cards')
       .select('*');
@@ -40,6 +47,13 @@ serve(async (req) => {
     // If there are profile IDs to exclude, add that to the query
     if (excludeIds.length > 0) {
       query = query.not('id', 'in', `(${excludeIds.join(',')})`);
+    }
+    
+    // Apply gender preference filtering
+    if (genderPreference === 'male') {
+      query = query.eq('gender', 'male');
+    } else if (genderPreference === 'female') {
+      query = query.eq('gender', 'female');
     }
     
     const { data, error } = await query;

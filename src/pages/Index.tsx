@@ -37,6 +37,22 @@ const Index = () => {
           return;
         }
 
+        // First, fetch the user's own profile for gender and preference
+        const { data: userProfile, error: userProfileError } = await supabase
+          .from('cards')
+          .select('gender, preference')
+          .eq('id', userId)
+          .single();
+        
+        if (userProfileError) {
+          console.error("Error fetching user profile:", userProfileError);
+        }
+        
+        const userGender = userProfile?.gender || null;
+        const genderPreference = userProfile?.preference || null;
+        
+        console.log("User gender:", userGender, "Preference:", genderPreference);
+
         // First, fetch all existing connections and rejected profiles
         const { data: connectionsData, error: connectionsError } = await supabase.functions.invoke('get-matches');
         
@@ -52,9 +68,9 @@ const Index = () => {
           connectionsData.forEach((connection: any) => {
             // If is_match is true, it's a connection, otherwise it was rejected
             if (connection.is_match) {
-              connectionIds.push(connection.id);
+              connectionIds.push(connection.liked_user_id);
             } else {
-              rejectedIds.push(connection.id);
+              rejectedIds.push(connection.liked_user_id);
             }
           });
         }
@@ -62,7 +78,9 @@ const Index = () => {
         // Now fetch profiles, filtering out connections and rejected ones on the server
         const { data, error } = await supabase.functions.invoke('get-cards', {
           body: {
-            excludeIds: [...connectionIds, ...rejectedIds]
+            excludeIds: [...connectionIds, ...rejectedIds],
+            genderPreference: genderPreference,
+            userGender: userGender
           }
         });
         

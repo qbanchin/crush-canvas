@@ -14,16 +14,6 @@ serve(async (req) => {
   }
 
   try {
-    // Get the request body
-    const { userId } = await req.json();
-    
-    // Validate the request
-    if (!userId) {
-      throw new Error("Missing userId");
-    }
-
-    console.log("Getting matches for user:", userId);
-
     // Create a Supabase client with the Auth context of the logged in user
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -35,46 +25,30 @@ serve(async (req) => {
       }
     );
 
-    // Get the user's matches
+    // Get the current user's ID
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+
+    const userId = user.id;
+    console.log("Getting matches for user:", userId);
+
+    // Get the user's matches and rejected profiles
     const { data: matchesData, error: matchesError } = await supabaseClient
       .from("matches")
-      .select("liked_user_id")
-      .eq("user_id", userId)
-      .eq("is_match", true);
+      .select("*")
+      .eq("user_id", userId);
 
     if (matchesError) {
       console.error("Error fetching matches:", matchesError);
       throw matchesError;
     }
 
-    console.log("Found matches:", matchesData?.length || 0);
+    console.log("Found connections:", matchesData?.length || 0);
 
-    if (!matchesData || matchesData.length === 0) {
-      return new Response(JSON.stringify([]), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
-    }
-
-    // Get the profiles of the matched users
-    const matchedUserIds = matchesData.map(match => match.liked_user_id);
-    
-    console.log("Fetching profiles for matched users:", matchedUserIds);
-    
-    const { data: profilesData, error: profilesError } = await supabaseClient
-      .from("cards")
-      .select("*")
-      .in("id", matchedUserIds);
-
-    if (profilesError) {
-      console.error("Error fetching profiles:", profilesError);
-      throw profilesError;
-    }
-
-    console.log("Found profiles:", profilesData?.length || 0);
-
-    // Return the matched profiles
-    return new Response(JSON.stringify(profilesData || []), {
+    // Return all matches/rejections (including is_match flag)
+    return new Response(JSON.stringify(matchesData || []), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
