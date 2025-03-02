@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
@@ -152,21 +153,36 @@ const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ chil
     handlePhotoDeleted: !!handlePhotoDeleted
   });
 
-  const childrenWithProps = React.Children.map(children, child => {
-    if (React.isValidElement(child)) {
-      if (child.type === ProfileContent || child.type === ProfileContentHandlers) {
-        return React.cloneElement(child, {
-          onPhotosAdded: handlePhotosAdded,
-          onPhotosReordered: handlePhotosReordered,
-          onPhotoDeleted: handlePhotoDeleted
-        } as PhotoHandlerProps);
+  // Use React.Children.map to recursively clone and pass props to all children
+  const enhanceChildrenWithProps = (children: React.ReactNode): React.ReactNode => {
+    return React.Children.map(children, child => {
+      if (!React.isValidElement(child)) {
+        return child;
       }
+
+      // Props to pass to immediate children
+      const photoProps: PhotoHandlerProps = {
+        onPhotosAdded: handlePhotosAdded,
+        onPhotosReordered: handlePhotosReordered,
+        onPhotoDeleted: handlePhotoDeleted
+      };
+
+      // If this is ProfileContentHandlers or ProfileContent, pass the props
+      if (child.type === ProfileContentHandlers || child.type === ProfileContent) {
+        return React.cloneElement(child, photoProps);
+      }
+
+      // If the child has children, recursively process them
+      if (child.props.children) {
+        const newChildren = enhanceChildrenWithProps(child.props.children);
+        return React.cloneElement(child, {}, newChildren);
+      }
+
       return child;
-    }
-    return child;
-  });
+    });
+  };
   
-  return <>{childrenWithProps}</>;
+  return <>{enhanceChildrenWithProps(children)}</>;
 };
 
 export default PhotoManagementHandlers;
