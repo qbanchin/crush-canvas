@@ -16,18 +16,27 @@ export function useConnectionsData(): ConnectionsDataReturn {
   
   const { connections, loading, currentUserID, useTestData, unreadMessages } = state;
   
+  // Only fetch data when component mounts or when useTestData changes
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchData = async () => {
       try {
+        if (!isMounted) return;
+        
         setState(prev => ({ ...prev, loading: true }));
         
         // Get the current user ID first
         const userId = await getCurrentUser();
+        
+        if (!isMounted) return;
         setState(prev => ({ ...prev, currentUserID: userId }));
         
         // Try to fetch from Supabase first
         if (!useTestData) {
           const data = await fetchConnectionsFromSupabase(userId);
+          
+          if (!isMounted) return;
           
           if (data) {
             // Map the data to include hasNewMessage flag
@@ -44,14 +53,17 @@ export function useConnectionsData(): ConnectionsDataReturn {
             return;
           } else {
             toast.error("Using test data instead of backend");
+            if (!isMounted) return;
             setState(prev => ({ ...prev, useTestData: true }));
           }
         }
         
         // Fall back to test data if Supabase call fails or useTestData is true
-        if (useTestData) {
+        if (useTestData && isMounted) {
           // Simulate a short loading delay for test data
-          setTimeout(() => {
+          const timer = setTimeout(() => {
+            if (!isMounted) return;
+            
             const testConnections = getTestConnections(unreadMessages);
             setState(prev => ({ 
               ...prev, 
@@ -59,18 +71,26 @@ export function useConnectionsData(): ConnectionsDataReturn {
               loading: false 
             }));
           }, 800);
+          
+          return () => clearTimeout(timer);
         }
       } catch (error) {
         console.error("Error:", error);
-        toast.error("Something went wrong");
-        setState(prev => ({ ...prev, loading: false }));
+        if (isMounted) {
+          toast.error("Something went wrong");
+          setState(prev => ({ ...prev, loading: false }));
+        }
       }
     };
 
     fetchData();
-  }, [useTestData, unreadMessages]);
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [useTestData]); // Only depend on useTestData to prevent unnecessary refetches
   
-  // Define callbacks for updating the state
+  // Memoize these callbacks to prevent unnecessary recreations
   const setUnreadMessages = useCallback((value: Record<string, boolean> | ((prev: Record<string, boolean>) => Record<string, boolean>)) => {
     setState(prev => {
       const newUnreadMessages = typeof value === 'function' ? value(prev.unreadMessages) : value;
@@ -85,7 +105,8 @@ export function useConnectionsData(): ConnectionsDataReturn {
     });
   }, []);
   
-  // Set up subscription for new messages
+  // Set up subscription for new messages - but don't make it depend on connections array
+  // to prevent creating new subscription on every connection update
   useMessageSubscription({
     userId: currentUserID || '',
     connections,
