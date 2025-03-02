@@ -1,9 +1,13 @@
-import React, { useRef, useState } from 'react';
-import { Camera, Upload, Trash2, ImageIcon, Move } from 'lucide-react';
+
+import React, { useState } from 'react';
+import { ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import PhotoPreviewGrid from './PhotoPreviewGrid';
+import DraggablePhotoGrid from './DraggablePhotoGrid';
+import PhotoUploadArea from './PhotoUploadArea';
 
 interface PhotoManagementProps {
   userImages: string[];
@@ -19,12 +23,10 @@ const PhotoManagement: React.FC<PhotoManagementProps> = ({
   onPhotoDeleted
 }) => {
   const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState("add");
+  const [activeTab, setActiveTab] = useState("edit");
   const [editablePhotos, setEditablePhotos] = useState<string[]>([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
@@ -122,12 +124,6 @@ const PhotoManagement: React.FC<PhotoManagementProps> = ({
     }
   };
 
-  const handleTriggerFileInput = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
   const handleDragStart = (index: number) => {
     setDraggedIndex(index);
   };
@@ -172,94 +168,22 @@ const PhotoManagement: React.FC<PhotoManagementProps> = ({
           </TabsList>
           
           <TabsContent value="edit" className="space-y-4 py-4">
-            {editablePhotos.length > 0 ? (
-              <div className="mt-4">
-                <h4 className="text-sm font-medium mb-2">Your Photos ({editablePhotos.length})</h4>
-                <p className="text-xs text-muted-foreground mb-2">Drag photos to reorder. Your first photo will be your main profile photo.</p>
-                <div className="grid grid-cols-3 gap-2">
-                  {editablePhotos.map((url, index) => (
-                    <div 
-                      key={index} 
-                      className={`relative aspect-square rounded-md overflow-hidden bg-muted cursor-move border-2 ${
-                        draggedIndex === index ? 'border-primary' : 'border-transparent'
-                      }`}
-                      draggable
-                      onDragStart={() => handleDragStart(index)}
-                      onDragOver={(e) => handleDragOver(e, index)}
-                      onDragEnd={handleDragEnd}
-                    >
-                      <img 
-                        src={url} 
-                        alt={`Photo ${index + 1}`} 
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute top-1 left-1 bg-black/50 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                        {index + 1}
-                      </div>
-                      <Button 
-                        variant="destructive" 
-                        size="icon" 
-                        className="absolute top-1 right-1 h-6 w-6"
-                        onClick={() => handleDeleteExistingPhoto(index)}
-                      >
-                        <Trash2 size={14} />
-                      </Button>
-                      <Move className="absolute bottom-1 right-1 h-5 w-5 text-white opacity-75" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center p-4 border border-dashed rounded-md">
-                <ImageIcon size={48} className="text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">No photos to edit</p>
-              </div>
-            )}
+            <DraggablePhotoGrid 
+              photos={editablePhotos}
+              draggedIndex={draggedIndex}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDragEnd={handleDragEnd}
+              onDeletePhoto={handleDeleteExistingPhoto}
+            />
           </TabsContent>
           
           <TabsContent value="add" className="space-y-4 py-4">
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              accept="image/*"
-              multiple
-              onChange={handleFileSelect}
+            <PhotoUploadArea onFileSelect={handleFileSelect} />
+            <PhotoPreviewGrid 
+              previewUrls={previewUrls}
+              onRemovePhoto={handleRemovePhoto}
             />
-            
-            <Button 
-              variant="outline" 
-              className="w-full h-20 flex flex-col justify-center items-center gap-2"
-              onClick={handleTriggerFileInput}
-            >
-              <Upload size={24} />
-              <span>Select Photos</span>
-            </Button>
-            
-            {previewUrls.length > 0 && (
-              <div className="mt-4">
-                <h4 className="text-sm font-medium mb-2">Selected Photos ({previewUrls.length})</h4>
-                <div className="grid grid-cols-3 gap-2">
-                  {previewUrls.map((url, index) => (
-                    <div key={index} className="relative aspect-square rounded-md overflow-hidden bg-muted">
-                      <img 
-                        src={url} 
-                        alt={`Preview ${index}`} 
-                        className="w-full h-full object-cover"
-                      />
-                      <Button 
-                        variant="destructive" 
-                        size="icon" 
-                        className="absolute top-1 right-1 h-6 w-6"
-                        onClick={() => handleRemovePhoto(index)}
-                      >
-                        <Trash2 size={14} />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </TabsContent>
         </Tabs>
         
