@@ -1,13 +1,7 @@
 
 import React, { useState } from 'react';
-import { ImageIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import PhotoPreviewGrid from './PhotoPreviewGrid';
-import DraggablePhotoGrid from './DraggablePhotoGrid';
-import PhotoUploadArea from './PhotoUploadArea';
+import PhotoManagementDialog from './PhotoManagementDialog';
 
 interface PhotoManagementProps {
   userImages: string[];
@@ -146,57 +140,23 @@ const PhotoManagement: React.FC<PhotoManagementProps> = ({
   };
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="flex-1 gap-2" onClick={handleOpenDialog}>
-          <ImageIcon size={16} />
-          Edit Photos
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Manage Photos</DialogTitle>
-          <DialogDescription>
-            Add, remove, or reorder your profile photos.
-          </DialogDescription>
-        </DialogHeader>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="edit">Edit Existing</TabsTrigger>
-            <TabsTrigger value="add">Add New</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="edit" className="space-y-4 py-4">
-            <DraggablePhotoGrid 
-              photos={editablePhotos}
-              draggedIndex={draggedIndex}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDragEnd={handleDragEnd}
-              onDeletePhoto={handleDeleteExistingPhoto}
-            />
-          </TabsContent>
-          
-          <TabsContent value="add" className="space-y-4 py-4">
-            <PhotoUploadArea onFileSelect={handleFileSelect} />
-            <PhotoPreviewGrid 
-              previewUrls={previewUrls}
-              onRemovePhoto={handleRemovePhoto}
-            />
-          </TabsContent>
-        </Tabs>
-        
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSavePhotos}>
-            Save Changes
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <PhotoManagementDialog
+      isOpen={isDialogOpen}
+      onOpenChange={setIsDialogOpen}
+      userImages={userImages}
+      onSave={handleSavePhotos}
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+      editablePhotos={editablePhotos}
+      previewUrls={previewUrls}
+      onDeleteExistingPhoto={handleDeleteExistingPhoto}
+      draggedIndex={draggedIndex}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
+      onFileSelect={handleFileSelect}
+      onRemovePhoto={handleRemovePhoto}
+    />
   );
 };
 
