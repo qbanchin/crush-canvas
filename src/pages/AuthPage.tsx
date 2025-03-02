@@ -59,7 +59,20 @@ const AuthPage = () => {
           console.error("Failed to create profile:", profileError);
           toast.error("Account created but profile setup failed. Please contact support.");
         } else {
-          toast.success('Account created successfully! Please check your email for verification.');
+          toast.success('Account created successfully! Redirecting to your profile.');
+          
+          // Sign in the user automatically after successful signup
+          const { error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+          
+          if (signInError) {
+            throw signInError;
+          }
+          
+          // Redirect to the profile page instead of the home page
+          navigate('/profile');
         }
       }
     } catch (error: any) {
