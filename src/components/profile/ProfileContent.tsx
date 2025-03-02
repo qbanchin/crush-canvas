@@ -42,12 +42,8 @@ const ProfileContent: React.FC<{
     setDistanceUnit
   } = useProfileContext();
 
-  // Log handlers to verify they're defined at this level
-  console.log('ProfileContent - Handlers defined:', {
-    onPhotosAdded: !!onPhotosAdded,
-    onPhotosReordered: !!onPhotosReordered,
-    onPhotoDeleted: !!onPhotoDeleted || !!handleDeleteImage
-  });
+  // Log to debug images
+  console.log('ProfileContent - User images:', user.images?.length, 'Current index:', currentImageIndex);
 
   if (loading) {
     return (
@@ -69,7 +65,10 @@ const ProfileContent: React.FC<{
   return (
     <>
       <ProfileHeader
-        user={user}
+        user={{
+          ...user,
+          images: user.images || ["/placeholder.svg"] // Ensure images is always an array
+        }}
         currentImageIndex={currentImageIndex}
         handlePrevImage={handlePrevImage}
         handleNextImage={handleNextImage}
@@ -84,7 +83,7 @@ const ProfileContent: React.FC<{
       
       <ActionButtons 
         onEditProfile={onEditProfile}
-        userImages={user.images}
+        userImages={user.images || []}
         onPhotosAdded={onPhotosAdded}
         onPhotosReordered={onPhotosReordered}
         onPhotoDeleted={onPhotoDeleted || handleDeleteImage}

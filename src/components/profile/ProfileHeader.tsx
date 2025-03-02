@@ -49,18 +49,25 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     });
   };
 
+  // Add validation and debugging for images
+  console.log("ProfileHeader - User images:", user.images?.length, "Current index:", currentImageIndex);
+  
+  // Make sure the current image index is valid
+  const validIndex = Math.min(Math.max(0, currentImageIndex), (user.images?.length || 1) - 1);
+  const currentImage = user.images && user.images.length > 0 ? user.images[validIndex] : '/placeholder.svg';
+
   return (
     <div className="flex items-end relative mb-6">
       <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-background relative">
         <div 
           className="w-full h-full bg-cover bg-center" 
-          style={{ backgroundImage: `url(${user.images[currentImageIndex]})` }}
+          style={{ backgroundImage: `url(${currentImage})` }}
         />
-        {user.images.length > 0 && (
+        {user.images && user.images.length > 0 && (
           <div className="absolute inset-0">
             <ProfileCarousel 
               images={user.images}
-              currentImageIndex={currentImageIndex}
+              currentImageIndex={validIndex}
               onPrevImage={handlePrevImage}
               onNextImage={handleNextImage}
               onDeleteImage={handleDeleteImage}

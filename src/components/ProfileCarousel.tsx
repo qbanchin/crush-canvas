@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ProfileCarouselProps {
@@ -20,6 +20,17 @@ const ProfileCarousel: React.FC<ProfileCarouselProps> = ({
   onDeleteImage,
   allowDelete = false,
 }) => {
+  // Add validation and logging to debug the images array
+  if (!images || !Array.isArray(images)) {
+    console.error("Invalid images prop:", images);
+    return null;
+  }
+  
+  console.log("ProfileCarousel - Images array:", images.length, "Current index:", currentImageIndex);
+  
+  // Make sure currentImageIndex is valid
+  const safeIndex = Math.min(Math.max(0, currentImageIndex), images.length - 1);
+  
   return (
     <>
       {/* Image navigation dots */}
@@ -28,7 +39,7 @@ const ProfileCarousel: React.FC<ProfileCarouselProps> = ({
           <div 
             key={index}
             className={`h-1 rounded-full transition-all duration-300 ${
-              index === currentImageIndex 
+              index === safeIndex 
                 ? 'w-6 bg-white' 
                 : 'w-1.5 bg-white/50'
             }`}
@@ -44,7 +55,7 @@ const ProfileCarousel: React.FC<ProfileCarouselProps> = ({
           className="absolute top-4 right-4 h-8 w-8 opacity-70 hover:opacity-100"
           onClick={(e) => {
             e.stopPropagation();
-            onDeleteImage(currentImageIndex);
+            if (onDeleteImage) onDeleteImage(safeIndex);
           }}
         >
           <Trash2 size={16} />
@@ -61,7 +72,11 @@ const ProfileCarousel: React.FC<ProfileCarouselProps> = ({
               e.stopPropagation();
               onPrevImage(e as unknown as React.MouseEvent);
             }}
-          />
+          >
+            <div className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 p-1 rounded-full">
+              <ArrowLeft size={20} className="text-white" />
+            </div>
+          </div>
           <div 
             className="absolute right-0 top-0 bottom-0 w-1/4" 
             onClick={onNextImage}
@@ -69,7 +84,11 @@ const ProfileCarousel: React.FC<ProfileCarouselProps> = ({
               e.stopPropagation();
               onNextImage(e as unknown as React.MouseEvent);
             }}
-          />
+          >
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 p-1 rounded-full">
+              <ArrowRight size={20} className="text-white" />
+            </div>
+          </div>
         </>
       )}
     </>

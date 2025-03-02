@@ -23,17 +23,23 @@ const TinderCard: React.FC<TinderCardProps> = ({ profile, onSwipe, isTop }) => {
     handleSwipe
   } = useSwipe({ isTop, onSwipe });
 
+  // Add validation and logging
+  const images = profile.images || [];
+  console.log("TinderCard - Profile images:", images.length, "Current index:", currentImageIndex);
+
   const nextImage = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (images.length <= 1) return;
     setCurrentImageIndex((prev) => 
-      prev < profile.images.length - 1 ? prev + 1 : 0
+      prev < images.length - 1 ? prev + 1 : 0
     );
   };
 
   const prevImage = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (images.length <= 1) return;
     setCurrentImageIndex((prev) => 
-      prev > 0 ? prev - 1 : profile.images.length - 1
+      prev > 0 ? prev - 1 : images.length - 1
     );
   };
 
@@ -47,8 +53,12 @@ const TinderCard: React.FC<TinderCardProps> = ({ profile, onSwipe, isTop }) => {
     setCurrentImageIndex(0);
   }, [profile.id]);
 
+  // Ensure valid image index
+  const validIndex = Math.min(Math.max(0, currentImageIndex), images.length - 1);
+  const currentImage = images.length > 0 ? images[validIndex] : '/placeholder.svg';
+
   const cardStyle = {
-    backgroundImage: `url(${profile.images[currentImageIndex]})`,
+    backgroundImage: `url(${currentImage})`,
     zIndex: isTop ? 10 : 0
   };
 
@@ -65,8 +75,8 @@ const TinderCard: React.FC<TinderCardProps> = ({ profile, onSwipe, isTop }) => {
       style={cardStyle}
     >
       <ProfileCarousel 
-        images={profile.images}
-        currentImageIndex={currentImageIndex}
+        images={images}
+        currentImageIndex={validIndex}
         onPrevImage={prevImage}
         onNextImage={nextImage}
       />

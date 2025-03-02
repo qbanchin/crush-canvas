@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 export interface UserProfile {
   name: string;
@@ -72,6 +72,21 @@ export const ProfileProvider: React.FC<{ children: ReactNode }> = ({ children })
     age: user.age,
     location: user.location
   });
+  
+  // Add effect to reset current image index when images change
+  useEffect(() => {
+    // If the current index is out of bounds after images update
+    if (currentImageIndex >= user.images.length) {
+      console.log("Resetting current image index because it's out of bounds");
+      setCurrentImageIndex(0);
+    }
+    
+    // Log image information for debugging
+    console.log("ProfileContext - User images updated:", 
+      user.images?.length, 
+      "Current index:", currentImageIndex
+    );
+  }, [user.images, currentImageIndex]);
   
   const value = {
     user,
