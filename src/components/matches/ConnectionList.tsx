@@ -25,7 +25,10 @@ const ConnectionList = ({ connections, loading, onProfileClick }: ConnectionList
     return (
       <div className="text-center py-12">
         <h3 className="text-xl font-semibold mb-2">No connections yet</h3>
-        <p className="text-muted-foreground">Keep swiping to find your connections!</p>
+        <p className="text-muted-foreground">Start swiping to find your matches!</p>
+        <p className="text-sm mt-4 text-muted-foreground">
+          When you match with someone, they'll appear here
+        </p>
       </div>
     );
   }
@@ -40,11 +43,15 @@ const ConnectionList = ({ connections, loading, onProfileClick }: ConnectionList
         >
           <div 
             className="h-40 bg-cover bg-center hover:opacity-90 transition-opacity" 
-            style={{ backgroundImage: `url(${connection.images[0]})` }}
+            style={{ 
+              backgroundImage: `url(${connection.images && connection.images.length > 0 
+                ? connection.images[0] 
+                : '/placeholder.svg'})` 
+            }}
           ></div>
           <div className="p-3">
             <h3 className="font-medium">{connection.name}, {connection.age}</h3>
-            <p className="text-sm text-muted-foreground truncate">{connection.bio}</p>
+            <p className="text-sm text-muted-foreground truncate">{connection.bio || "No bio available"}</p>
           </div>
         </div>
       ))}

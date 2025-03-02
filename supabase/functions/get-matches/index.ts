@@ -22,6 +22,8 @@ serve(async (req) => {
       throw new Error("Missing userId");
     }
 
+    console.log("Getting matches for user:", userId);
+
     // Create a Supabase client with the Auth context of the logged in user
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -40,7 +42,12 @@ serve(async (req) => {
       .eq("user_id", userId)
       .eq("is_match", true);
 
-    if (matchesError) throw matchesError;
+    if (matchesError) {
+      console.error("Error fetching matches:", matchesError);
+      throw matchesError;
+    }
+
+    console.log("Found matches:", matchesData?.length || 0);
 
     if (!matchesData || matchesData.length === 0) {
       return new Response(JSON.stringify([]), {
@@ -51,12 +58,20 @@ serve(async (req) => {
 
     // Get the profiles of the matched users
     const matchedUserIds = matchesData.map(match => match.liked_user_id);
+    
+    console.log("Fetching profiles for matched users:", matchedUserIds);
+    
     const { data: profilesData, error: profilesError } = await supabaseClient
       .from("cards")
       .select("*")
       .in("id", matchedUserIds);
 
-    if (profilesError) throw profilesError;
+    if (profilesError) {
+      console.error("Error fetching profiles:", profilesError);
+      throw profilesError;
+    }
+
+    console.log("Found profiles:", profilesData?.length || 0);
 
     // Return the matched profiles
     return new Response(JSON.stringify(profilesData || []), {
@@ -64,7 +79,7 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error in get-matches function:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 400,

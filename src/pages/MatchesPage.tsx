@@ -12,30 +12,51 @@ import ConnectionChat from '@/components/ConnectionChat';
 const MatchesPage = () => {
   const [connections, setConnections] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentUserID, setCurrentUserID] = useState("temp-user-id"); // Will be replaced with auth user ID later
+  const [currentUserID, setCurrentUserID] = useState<string | null>(null);
   const [useTestData, setUseTestData] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
 
   useEffect(() => {
+    // Get current authenticated user
+    const getCurrentUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (data?.user) {
+        setCurrentUserID(data.user.id);
+        return data.user.id;
+      }
+      // Fall back to test user id for development
+      return "temp-user-id";
+    };
+
     const fetchConnections = async () => {
       try {
         setLoading(true);
         
+        // Get the current user ID first
+        const userId = await getCurrentUser();
+        
         // Try to fetch from Supabase first
         if (!useTestData) {
-          const { data, error } = await supabase.functions.invoke('get-matches', {
-            body: { userId: currentUserID }
-          });
-          
-          if (error) {
-            console.error("Error fetching connections:", error);
-            toast.error("Using test data instead of backend");
+          try {
+            const { data, error } = await supabase.functions.invoke('get-matches', {
+              body: { userId }
+            });
+            
+            if (error) {
+              console.error("Error fetching connections:", error);
+              toast.error("Using test data instead of backend");
+              setUseTestData(true);
+            } else if (data && Array.isArray(data)) {
+              console.log("Connections loaded:", data.length);
+              setConnections(data);
+              setLoading(false);
+              return;
+            }
+          } catch (err) {
+            console.error("Failed to fetch connections:", err);
+            toast.error("Using test data as fallback");
             setUseTestData(true);
-          } else if (data && Array.isArray(data)) {
-            setConnections(data);
-            setLoading(false);
-            return;
           }
         }
         
@@ -123,7 +144,7 @@ const MatchesPage = () => {
         open={chatOpen}
         onOpenChange={setChatOpen}
         connection={selectedProfile}
-        currentUserId={currentUserID}
+        currentUserId={currentUserID || ""}
         useTestData={useTestData}
         onMessageSent={handleMessageSent}
       />
