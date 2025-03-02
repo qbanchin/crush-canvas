@@ -48,6 +48,7 @@ const Index = () => {
         
         if (userProfileError) {
           console.error("Error fetching user profile:", userProfileError);
+          toast.error("Failed to load user preferences");
           // Continue without filtering by gender preference
         }
         
