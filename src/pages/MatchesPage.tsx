@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import HeaderBar from '@/components/HeaderBar';
 import NavBar from '@/components/NavBar';
@@ -7,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Profile, profiles } from '@/data/profiles';
 
 const MatchesPage = () => {
+  const navigate = useNavigate();
   const [connections, setConnections] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserID, setCurrentUserID] = useState("temp-user-id"); // Will be replaced with auth user ID later
@@ -62,6 +64,15 @@ const MatchesPage = () => {
     setLoading(true);
   };
 
+  const handleProfileClick = (profileId: string) => {
+    // In a real app, you would navigate to a detailed profile view
+    // For now, we'll just show a toast message
+    toast.info(`Viewing profile ${profileId}`);
+    
+    // Potentially navigate to a profile detail page in the future
+    // navigate(`/profile/${profileId}`);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <HeaderBar />
@@ -91,10 +102,11 @@ const MatchesPage = () => {
             {connections.map((connection) => (
               <div 
                 key={connection.id} 
-                className="flex flex-col border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow"
+                className="flex flex-col border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => handleProfileClick(connection.id)}
               >
                 <div 
-                  className="h-40 bg-cover bg-center" 
+                  className="h-40 bg-cover bg-center hover:opacity-90 transition-opacity" 
                   style={{ backgroundImage: `url(${connection.images[0]})` }}
                 ></div>
                 <div className="p-3">
