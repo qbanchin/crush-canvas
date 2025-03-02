@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
@@ -9,9 +8,26 @@ export const usePhotoAddHandler = (
   setUser: React.Dispatch<React.SetStateAction<UserProfile>>
 ) => {
   const { toast } = useToast();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handlePhotosAdded = async (newPhotos: string[]) => {
+    // Prevent multiple simultaneous uploads
+    if (isProcessing) {
+      toast({
+        title: "Upload in progress",
+        description: "Please wait for the current upload to complete.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
+      setIsProcessing(true);
+
+      if (!newPhotos || newPhotos.length === 0) {
+        throw new Error("No photos provided for upload");
+      }
+
       const { data: { user: authUser } } = await supabase.auth.getUser();
       
       if (!authUser) {
@@ -23,7 +39,7 @@ export const usePhotoAddHandler = (
         return;
       }
       
-      console.log("Adding photos:", newPhotos);
+      console.log("Adding photos:", newPhotos.length);
       
       // Create a copy of existing images and add new ones
       const updatedImages = [...user.images];
@@ -33,8 +49,27 @@ export const usePhotoAddHandler = (
         updatedImages.length = 0;
       }
       
-      // Add new photos
-      updatedImages.push(...newPhotos);
+      // Validate each photo before adding
+      for (const photo of newPhotos) {
+        if (!photo || typeof photo !== 'string') {
+          console.error("Invalid photo format detected", photo);
+          continue; // Skip invalid photos instead of failing
+        }
+        
+        // Check if the string is a valid base64 or URL
+        if (!(photo.startsWith('data:') || photo.startsWith('http'))) {
+          console.error("Photo has invalid format", photo.substring(0, 50) + "...");
+          continue; // Skip invalid format
+        }
+        
+        updatedImages.push(photo);
+      }
+      
+      if (updatedImages.length === 0) {
+        // If all photos were invalid, keep placeholder
+        updatedImages.push('/placeholder.svg');
+        throw new Error("All provided photos were invalid");
+      }
       
       // Update the database
       const { error } = await supabase
@@ -61,11 +96,13 @@ export const usePhotoAddHandler = (
       console.error("Error adding photos:", error);
       toast({
         title: "Error adding photos",
-        description: error.message,
+        description: error.message || "Failed to process images. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
-  return { handlePhotosAdded };
+  return { handlePhotosAdded, isProcessing };
 };
