@@ -1,6 +1,5 @@
 
 import { PhotoManagementState, PhotoManagementHandlers } from '../types/photoManagementTypes';
-import { Toast } from "@/hooks/use-toast";
 
 export function handleSavePhotos(
   state: PhotoManagementState,
