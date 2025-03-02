@@ -72,8 +72,23 @@ serve(async (req) => {
       throw error;
     }
 
+    // Ensure consistent data structure with mock data
+    const formattedData = data.map(card => ({
+      id: card.id,
+      name: card.name || 'Unknown',
+      age: card.age || 25,
+      bio: card.bio || 'No bio available',
+      distance: card.distance || Math.floor(Math.random() * 10) + 1, // Random distance if not set
+      images: Array.isArray(card.images) && card.images.length > 0 
+        ? card.images 
+        : ["https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3"],
+      tags: Array.isArray(card.tags) && card.tags.length > 0 
+        ? card.tags 
+        : ['New', 'Profile']
+    }));
+
     // Return the cards as the response
-    return new Response(JSON.stringify(data), {
+    return new Response(JSON.stringify(formattedData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
