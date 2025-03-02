@@ -10,12 +10,21 @@ interface MessageListProps {
 
 const MessageList = ({ messages, loading }: MessageListProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   
+  // Scroll to bottom when messages change
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
+
+  // Initial scroll to bottom when component mounts
+  useEffect(() => {
+    if (messagesEndRef.current && messagesContainerRef.current) {
+      messagesEndRef.current.scrollIntoView();
+    }
+  }, []);
 
   if (loading) {
     return (
@@ -34,11 +43,11 @@ const MessageList = ({ messages, loading }: MessageListProps) => {
   }
   
   return (
-    <div className="space-y-4 pb-2">
+    <div ref={messagesContainerRef} className="space-y-4 pb-2">
       {messages.map((message) => (
         <MessageBubble key={message.id} message={message} />
       ))}
-      <div ref={messagesEndRef} />
+      <div ref={messagesEndRef} className="h-[1px]" />
     </div>
   );
 };

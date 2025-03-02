@@ -44,7 +44,7 @@ serve(async (req) => {
     
     // For now, we'll just simulate a successful message send
     const data = {
-      id: `new-${Date.now()}`,
+      id: `sent-${Date.now()}`,
       senderId: userId,
       recipientId: recipientId,
       content: message,

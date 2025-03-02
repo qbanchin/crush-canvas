@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Message } from '@/types/message.types';
 import { Profile } from '@/data/profiles';
@@ -16,6 +16,7 @@ export const useChat = (
   const [sendingMessage, setSendingMessage] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const messageIdCounterRef = useRef(0);
 
   // Fetch messages when the dialog opens and connection exists
   useEffect(() => {
@@ -54,7 +55,8 @@ export const useChat = (
           // Mark messages as from current user or not
           const processedMessages = data.map(msg => ({
             ...msg,
-            isFromCurrentUser: msg.senderId === currentUserId
+            isFromCurrentUser: msg.senderId === currentUserId,
+            timestamp: new Date(msg.timestamp) // Ensure timestamp is a Date object
           }));
           setMessages(processedMessages);
         }
@@ -115,9 +117,9 @@ export const useChat = (
     setSendingMessage(true);
 
     try {
-      const newMessageId = `temp-${Date.now()}`;
+      const tempMessageId = `temp-${Date.now()}-${messageIdCounterRef.current++}`;
       const newMessage: Message = {
-        id: newMessageId,
+        id: tempMessageId,
         senderId: currentUserId,
         recipientId: connection.id,
         content: messageText.trim(),
@@ -127,6 +129,7 @@ export const useChat = (
 
       // Update local state immediately for better UX
       setMessages(prev => [...prev, newMessage]);
+      const sentMessageText = messageText.trim();
       setMessageText(''); // Clear input immediately for better UX
       
       // In a real app, this would send the message to your backend
@@ -136,7 +139,7 @@ export const useChat = (
           body: { 
             userId: currentUserId,
             recipientId: connection.id,
-            message: messageText.trim()
+            message: sentMessageText
           }
         });
         
@@ -145,11 +148,11 @@ export const useChat = (
           throw new Error("Failed to send message");
         }
 
-        console.log("Message sent successfully");
+        console.log("Message sent successfully", data);
         
         // If successful, refresh messages to get the properly saved message
         await new Promise(resolve => setTimeout(resolve, 300));
-        fetchMessages();
+        await fetchMessages();
       } else {
         // Just simulate a delay for test data
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -157,7 +160,7 @@ export const useChat = (
         // Add a simulated response in test mode
         setTimeout(() => {
           const responseMessage: Message = {
-            id: `response-${Date.now()}`,
+            id: `response-${Date.now()}-${messageIdCounterRef.current++}`,
             senderId: connection.id,
             recipientId: currentUserId,
             content: `Hey, thanks for your message! This is a simulated response from ${connection.name}.`,
