@@ -13,13 +13,30 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [showMatch, setShowMatch] = useState(false);
   const [matchedProfile, setMatchedProfile] = useState<Profile | null>(null);
-  const [currentUserID, setCurrentUserID] = useState("temp-user-id"); // Will be replaced with auth user ID later
+  const [currentUserID, setCurrentUserID] = useState<string | null>(null);
 
   useEffect(() => {
+    // Get current user ID first
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUserID(user.id);
+        return user.id;
+      }
+      return null;
+    };
+
     // Fetch profiles from the backend
     const fetchProfiles = async () => {
       try {
         setLoading(true);
+        const userId = await getCurrentUser();
+        
+        if (!userId) {
+          console.error("User not authenticated");
+          return;
+        }
+
         const { data, error } = await supabase.functions.invoke('get-cards');
         
         if (error) {
@@ -29,7 +46,9 @@ const Index = () => {
         }
         
         if (data && Array.isArray(data)) {
-          setProfiles(data);
+          // Filter out the current user's profile
+          const filteredProfiles = data.filter(profile => profile.id !== userId);
+          setProfiles(filteredProfiles);
         }
       } catch (error) {
         console.error("Error:", error);
@@ -51,6 +70,11 @@ const Index = () => {
 
     // Record the swipe in the backend
     try {
+      if (!currentUserID) {
+        console.error("User ID not available");
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('record-swipe', {
         body: {
           userId: currentUserID,
