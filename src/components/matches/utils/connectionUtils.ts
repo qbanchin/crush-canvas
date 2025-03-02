@@ -46,15 +46,42 @@ export const fetchConnectionsFromSupabase = async (userId: string): Promise<Exte
 
 // Get test connections for development
 export const getTestConnections = (unreadMessages: Record<string, boolean>): ExtendedProfile[] => {
-  // Use 3 random profiles from the local data as connections
-  const testConnections = [...profiles]
-    .sort(() => 0.5 - Math.random())
-    .slice(0, 3)
-    .map(profile => ({
-      ...profile,
-      // For testing, mark one profile randomly as having a new message
-      hasNewMessage: profile.id === profiles[0].id ? true : unreadMessages[profile.id] || false
-    }));
+  // Create specific profiles for Ana and Michael Jui
+  const anaProfile: ExtendedProfile = {
+    id: "ana-profile-id",
+    name: "Ana",
+    age: 28,
+    distance: 3,
+    bio: "Hi! I'm Ana. I love hiking, photography, and trying new foods.",
+    images: ["/lovable-uploads/045f4838-7fe0-4265-943a-0d7ba5dec7de.png"],
+    tags: ["Photography", "Hiking", "Foodie", "Travel"],
+    hasNewMessage: unreadMessages["ana-profile-id"] || true
+  };
+  
+  const michaelProfile: ExtendedProfile = {
+    id: "michael-profile-id",
+    name: "Michael Jui",
+    age: 32,
+    distance: 5,
+    bio: "Software engineer with a passion for music and outdoor activities.",
+    images: ["/lovable-uploads/290973f2-f16b-4e56-8cfe-afb3b85e2239.png"],
+    tags: ["Technology", "Music", "Nature", "Programming"],
+    hasNewMessage: unreadMessages["michael-profile-id"] || false
+  };
+  
+  // Use the specific profiles and add one random profile from the local data
+  const testConnections = [
+    anaProfile,
+    michaelProfile,
+    // Add one random profile to have some variety
+    ...profiles
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 1)
+      .map(profile => ({
+        ...profile,
+        hasNewMessage: unreadMessages[profile.id] || false
+      }))
+  ];
   
   console.log("Test connections with message indicators:", testConnections);
   return testConnections;
