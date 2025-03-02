@@ -16,7 +16,7 @@ const HeaderBar = () => {
 
   const getTitle = () => {
     const path = location.pathname;
-    if (path === '/') return 'Discover';
+    if (path === '/') return 'Explore';
     if (path === '/matches') return 'Connections';
     if (path === '/profile') return 'Profile';
     if (path === '/auth') return 'Account';
