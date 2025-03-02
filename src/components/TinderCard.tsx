@@ -19,12 +19,7 @@ const TinderCard: React.FC<TinderCardProps> = ({ profile, onSwipe, isTop }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   
   const {
-    isDragging,
-    offsetX,
     swipeDirection,
-    handleTouchStart,
-    handleTouchMove,
-    handleTouchEnd,
     handleSwipe
   } = useSwipe({ isTop, onSwipe });
 
@@ -53,7 +48,6 @@ const TinderCard: React.FC<TinderCardProps> = ({ profile, onSwipe, isTop }) => {
   }, [profile.id]);
 
   const cardStyle = {
-    transform: isDragging ? `translateX(${offsetX}px) rotate(${offsetX * 0.05}deg)` : 'none',
     backgroundImage: `url(${profile.images[currentImageIndex]})`,
     zIndex: isTop ? 10 : 0
   };
@@ -67,15 +61,8 @@ const TinderCard: React.FC<TinderCardProps> = ({ profile, onSwipe, isTop }) => {
   return (
     <div 
       ref={cardRef}
-      className={cn('tinder-card', isDragging && 'active', swipeClass)}
+      className={cn('tinder-card', swipeClass)}
       style={cardStyle}
-      onMouseDown={handleTouchStart}
-      onMouseMove={handleTouchMove}
-      onMouseUp={handleTouchEnd}
-      onMouseLeave={handleTouchEnd}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
     >
       <ProfileCarousel 
         images={profile.images}
