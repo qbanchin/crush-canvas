@@ -7,27 +7,24 @@ interface MessageBubbleProps {
 }
 
 const MessageBubble = ({ message }: MessageBubbleProps) => {
+  // Determine if message is from current user
+  const isCurrentUser = message.isFromCurrentUser;
+  
   return (
-    <div 
-      className={`flex ${message.isFromCurrentUser ? 'justify-end' : 'justify-start'}`}
-    >
+    <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
       <div 
-        className={`max-w-[80%] px-4 py-2 rounded-lg ${
-          message.isFromCurrentUser 
+        className={`max-w-[80%] rounded-lg p-3 ${
+          isCurrentUser 
             ? 'bg-primary text-primary-foreground' 
-            : 'bg-muted'
+            : 'bg-muted text-foreground'
         }`}
       >
-        <p className="break-words">{message.content}</p>
-        <p 
-          className={`text-xs mt-1 ${
-            message.isFromCurrentUser 
-              ? 'text-primary-foreground/70' 
-              : 'text-muted-foreground'
-          }`}
-        >
+        <div className="break-words">{message.content}</div>
+        <div className={`text-xs mt-1 ${
+          isCurrentUser ? 'text-primary-foreground/70' : 'text-muted-foreground'
+        }`}>
           {formatChatDate(message.timestamp)}
-        </p>
+        </div>
       </div>
     </div>
   );

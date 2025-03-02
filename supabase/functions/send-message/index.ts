@@ -44,11 +44,15 @@ serve(async (req) => {
     
     // For now, we'll just simulate a successful message send
     const data = {
-      success: true,
-      timestamp: new Date().toISOString()
+      id: `new-${Date.now()}`,
+      senderId: userId,
+      recipientId: recipientId,
+      content: message,
+      timestamp: new Date().toISOString(),
+      isFromCurrentUser: true
     }
 
-    // Return a success response
+    // Return a success response with the new message
     return new Response(
       JSON.stringify(data),
       { 

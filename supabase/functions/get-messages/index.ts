@@ -1,7 +1,8 @@
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 
+// Define CORS headers for browser requests
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -12,92 +13,65 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
-
+  
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
-    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-    const supabase = createClient(supabaseUrl, supabaseKey)
-
-    const body = await req.json()
-    const { userId, recipientId } = body
-
+    // Get request body
+    const { userId, recipientId } = await req.json()
+    
+    // Validate inputs
     if (!userId || !recipientId) {
       return new Response(
-        JSON.stringify({ error: 'User ID and recipient ID are required' }),
-        { 
-          status: 400, 
-          headers: { 
-            'Content-Type': 'application/json',
-            ...corsHeaders 
-          } 
-        }
+        JSON.stringify({ error: 'Missing required fields' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
     console.log(`Fetching messages between ${userId} and ${recipientId}`)
 
-    // This is a mock implementation for now
     // In a real app, you would query your messages table
-
-    // Include more varied mock messages
+    // For now, we'll return mock data that has better variety to test both sides of the conversation
     const mockMessages = [
       {
         id: '1',
         senderId: userId,
         recipientId: recipientId,
-        content: 'Hey there! How are you?',
-        timestamp: new Date(Date.now() - 86400000), // 1 day ago
-        isFromCurrentUser: true
+        content: 'Hey there! How are you doing?',
+        timestamp: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
       },
       {
         id: '2',
         senderId: recipientId,
         recipientId: userId,
-        content: 'I\'m doing great! Your profile caught my attention.',
-        timestamp: new Date(Date.now() - 43200000), // 12 hours ago
-        isFromCurrentUser: false
+        content: "I'm doing great! Thanks for asking. How about you?",
+        timestamp: new Date(Date.now() - 85400000).toISOString(), // A bit later
       },
       {
         id: '3',
         senderId: userId,
         recipientId: recipientId,
-        content: 'Thanks! I noticed we have some common interests. Would you like to chat more?',
-        timestamp: new Date(Date.now() - 21600000), // 6 hours ago
-        isFromCurrentUser: true
+        content: "I'm good! Just checking out this new app. The interface is nice.",
+        timestamp: new Date(Date.now() - 84400000).toISOString(),
       },
       {
         id: '4',
         senderId: recipientId,
         recipientId: userId,
-        content: 'Absolutely! I\'d love to know more about your hobbies.',
-        timestamp: new Date(Date.now() - 3600000), // 1 hour ago
-        isFromCurrentUser: false
+        content: "Yeah, it's pretty cool. Would you like to meet up sometime?",
+        timestamp: new Date(Date.now() - 43200000).toISOString(), // 12 hours ago
       }
     ]
-
-    console.log(`Retrieved ${mockMessages.length} messages between ${userId} and ${recipientId}`)
-
+    
     return new Response(
       JSON.stringify(mockMessages),
-      { 
-        headers: { 
-          'Content-Type': 'application/json',
-          ...corsHeaders 
-        } 
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
+    
   } catch (error) {
     console.error('Error:', error)
     
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { 
-        status: 500, 
-        headers: { 
-          'Content-Type': 'application/json',
-          ...corsHeaders 
-        } 
-      }
+      JSON.stringify({ error: 'Internal server error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 })
