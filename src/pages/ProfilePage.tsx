@@ -507,7 +507,7 @@ const ProfilePage = () => {
             
             {/* Settings links */}
             <div className="space-y-4">
-              <SettingsLink title="Discovery Settings" />
+              <SettingsLink title="Explore Settings" to="/settings/explore" />
               <SettingsLink title="Notification Settings" />
               <SettingsLink title="Privacy Settings" />
               <SettingsLink title="Help & Support" />
@@ -523,11 +523,21 @@ const ProfilePage = () => {
 
 interface SettingsLinkProps {
   title: string;
+  to?: string;
 }
 
-const SettingsLink: React.FC<SettingsLinkProps> = ({ title }) => {
+const SettingsLink: React.FC<SettingsLinkProps> = ({ title, to }) => {
+  const handleClick = () => {
+    if (to) {
+      window.location.href = to;
+    }
+  };
+
   return (
-    <div className="flex justify-between items-center p-3 rounded-lg hover:bg-muted/30 cursor-pointer transition-colors">
+    <div 
+      className="flex justify-between items-center p-3 rounded-lg hover:bg-muted/30 cursor-pointer transition-colors"
+      onClick={handleClick}
+    >
       <span>{title}</span>
       <ChevronRight size={18} className="text-muted-foreground" />
     </div>
