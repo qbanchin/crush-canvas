@@ -23,6 +23,13 @@ export const usePhotoManagement = ({
   const [editablePhotos, setEditablePhotos] = useState<string[]>([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
+  // Log info about the handlers to help with debugging
+  console.log('usePhotoManagement received handlers:', {
+    hasAddHandler: typeof onPhotosAdded === 'function',
+    hasReorderHandler: typeof onPhotosReordered === 'function',
+    hasDeleteHandler: typeof onPhotoDeleted === 'function'
+  });
+
   const handleOpenDialog = () => {
     setEditablePhotos([...userImages]);
     setSelectedFiles([]);
@@ -121,12 +128,14 @@ export const usePhotoManagement = ({
       return;
     }
     
-    const newPhotos = [...editablePhotos];
-    newPhotos.splice(index, 1);
-    setEditablePhotos(newPhotos);
-    
     if (typeof onPhotoDeleted === 'function') {
+      // Execute delete directly and update local state
       onPhotoDeleted(index);
+      
+      // Also update local state for immediate UI feedback
+      const newPhotos = [...editablePhotos];
+      newPhotos.splice(index, 1);
+      setEditablePhotos(newPhotos);
     } else {
       console.error("Photo delete handler not available");
       toast({

@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
-import { ImageIcon } from 'lucide-react';
 import PhotoManagementTabs from './PhotoManagementTabs';
 
 interface PhotoManagementDialogProps {
@@ -42,12 +41,6 @@ const PhotoManagementDialog: React.FC<PhotoManagementDialogProps> = ({
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="flex-1 gap-2">
-          <ImageIcon size={16} />
-          Edit Photos
-        </Button>
-      </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Manage Photos</DialogTitle>

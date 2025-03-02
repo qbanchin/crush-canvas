@@ -2,6 +2,8 @@
 import React from 'react';
 import PhotoManagementDialog from './PhotoManagementDialog';
 import { usePhotoManagement } from '@/hooks/usePhotoManagement';
+import { Button } from '@/components/ui/button';
+import { ImageIcon } from 'lucide-react';
 
 interface PhotoManagementProps {
   userImages: string[];
@@ -48,6 +50,11 @@ const PhotoManagement: React.FC<PhotoManagementProps> = ({
 
   return (
     <>
+      <Button variant="outline" className="flex-1 gap-2" onClick={handleOpenDialog}>
+        <ImageIcon size={16} />
+        Edit Photos
+      </Button>
+      
       <PhotoManagementDialog
         isOpen={isDialogOpen}
         onOpenChange={setIsDialogOpen}

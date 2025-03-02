@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Edit, ImageIcon } from 'lucide-react';
+import { Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PhotoManagement from './PhotoManagement';
 
