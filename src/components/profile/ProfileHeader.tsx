@@ -18,6 +18,7 @@ interface ProfileHeaderProps {
   currentImageIndex: number;
   handlePrevImage: (e: React.MouseEvent) => void;
   handleNextImage: (e: React.MouseEvent) => void;
+  handleDeleteImage?: (index: number) => void;
   showOnlineStatus: boolean;
   setShowOnlineStatus: React.Dispatch<React.SetStateAction<boolean>>;
   showActivity: boolean;
@@ -31,6 +32,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   currentImageIndex,
   handlePrevImage,
   handleNextImage,
+  handleDeleteImage,
   showOnlineStatus,
   setShowOnlineStatus,
   showActivity,
@@ -54,13 +56,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           className="w-full h-full bg-cover bg-center" 
           style={{ backgroundImage: `url(${user.images[currentImageIndex]})` }}
         />
-        {user.images.length > 1 && (
+        {user.images.length > 0 && (
           <div className="absolute inset-0">
             <ProfileCarousel 
               images={user.images}
               currentImageIndex={currentImageIndex}
               onPrevImage={handlePrevImage}
               onNextImage={handleNextImage}
+              onDeleteImage={handleDeleteImage}
+              allowDelete={true}
             />
           </div>
         )}

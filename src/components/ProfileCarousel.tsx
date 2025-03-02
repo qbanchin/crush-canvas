@@ -1,11 +1,15 @@
 
 import React from 'react';
+import { Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface ProfileCarouselProps {
   images: string[];
   currentImageIndex: number;
   onPrevImage: (e: React.MouseEvent) => void;
   onNextImage: (e: React.MouseEvent) => void;
+  onDeleteImage?: (index: number) => void;
+  allowDelete?: boolean;
 }
 
 const ProfileCarousel: React.FC<ProfileCarouselProps> = ({
@@ -13,6 +17,8 @@ const ProfileCarousel: React.FC<ProfileCarouselProps> = ({
   currentImageIndex,
   onPrevImage,
   onNextImage,
+  onDeleteImage,
+  allowDelete = false,
 }) => {
   return (
     <>
@@ -29,6 +35,21 @@ const ProfileCarousel: React.FC<ProfileCarouselProps> = ({
           />
         ))}
       </div>
+      
+      {/* Delete button */}
+      {allowDelete && onDeleteImage && images.length > 1 && (
+        <Button
+          variant="destructive"
+          size="icon"
+          className="absolute top-4 right-4 h-8 w-8 opacity-70 hover:opacity-100"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDeleteImage(currentImageIndex);
+          }}
+        >
+          <Trash2 size={16} />
+        </Button>
+      )}
       
       {/* Left/Right image navigation */}
       {images.length > 1 && (

@@ -7,11 +7,12 @@ import { Separator } from '@/components/ui/separator';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import BioEditor from '@/components/profile/BioEditor';
 import InterestsEditor from '@/components/profile/InterestsEditor';
-import PhotoManagement from '@/components/profile/PhotoManagement';
-import ProfileSettings, { SettingsLink } from '@/components/profile/ProfileSettings';
+import ProfileSettings from '@/components/profile/ProfileSettings';
 import ActionButtons from '@/components/profile/ActionButtons';
+import { useToast } from "@/hooks/use-toast";
 
 const ProfilePage = () => {
+  const { toast } = useToast();
   const [user, setUser] = useState({
     name: "Alex Morgan",
     age: 29,
@@ -51,6 +52,35 @@ const ProfilePage = () => {
     });
   };
 
+  const handleDeleteImage = (index: number) => {
+    if (user.images.length <= 1) {
+      toast({
+        title: "Cannot delete image",
+        description: "You must have at least one profile photo.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newImages = [...user.images];
+    newImages.splice(index, 1);
+    
+    setUser({
+      ...user,
+      images: newImages
+    });
+    
+    // Adjust current index if necessary
+    if (index >= newImages.length) {
+      setCurrentImageIndex(newImages.length - 1);
+    }
+    
+    toast({
+      title: "Photo deleted",
+      description: "Your profile photo has been deleted."
+    });
+  };
+
   const handleEditProfile = () => {
     // Future functionality for edit profile button
   };
@@ -67,6 +97,7 @@ const ProfilePage = () => {
               currentImageIndex={currentImageIndex}
               handlePrevImage={handlePrevImage}
               handleNextImage={handleNextImage}
+              handleDeleteImage={handleDeleteImage}
               showOnlineStatus={showOnlineStatus}
               setShowOnlineStatus={setShowOnlineStatus}
               showActivity={showActivity}
@@ -75,13 +106,11 @@ const ProfilePage = () => {
               setDistanceUnit={setDistanceUnit}
             />
             
-            <div className="flex gap-3 mb-8">
-              <ActionButtons onEditProfile={handleEditProfile} />
-              <PhotoManagement 
-                userImages={user.images}
-                onPhotosAdded={handlePhotosAdded}
-              />
-            </div>
+            <ActionButtons 
+              onEditProfile={handleEditProfile}
+              userImages={user.images}
+              onPhotosAdded={handlePhotosAdded}
+            />
             
             <BioEditor 
               bio={user.bio}
