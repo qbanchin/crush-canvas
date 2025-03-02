@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Flame, MessageSquare, User } from 'lucide-react';
+import { Binoculars, MessageSquare, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface NavBarProps {
@@ -22,7 +22,7 @@ const NavBar: React.FC<NavBarProps> = ({ className }) => {
         )}
         end
       >
-        <Flame size={24} />
+        <Binoculars size={24} />
         <span>Explore</span>
       </NavLink>
       
