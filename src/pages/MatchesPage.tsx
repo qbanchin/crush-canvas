@@ -15,7 +15,8 @@ const MatchesPage = () => {
     loading, 
     currentUserID, 
     useTestData, 
-    toggleTestData 
+    toggleTestData,
+    clearNewMessageFlag
   } = useConnectionsData();
   
   const {
@@ -35,6 +36,15 @@ const MatchesPage = () => {
     window.dispatchEvent(event);
   };
 
+  // Function to handle profile clicks that also clears message flags
+  const handleProfileSelection = (profileId: string) => {
+    // Clear the new message notification for this profile
+    clearNewMessageFlag(profileId);
+    
+    // Handle the profile click (open dialog)
+    handleProfileClick(profileId, connections);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <HeaderBar />
@@ -49,7 +59,7 @@ const MatchesPage = () => {
         <ConnectionList 
           connections={connections}
           loading={loading}
-          onProfileClick={(profileId) => handleProfileClick(profileId, connections)}
+          onProfileClick={handleProfileSelection}
         />
       </main>
 

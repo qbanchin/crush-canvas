@@ -1,6 +1,6 @@
 
 import { Profile } from '@/data/profiles';
-import { ImageIcon } from 'lucide-react';
+import { CheckCircle, ImageIcon } from 'lucide-react';
 
 interface ConnectionListProps {
   connections: Profile[];
@@ -38,6 +38,7 @@ const ConnectionList = ({ connections, loading, onProfileClick }: ConnectionList
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {connections.map((connection) => {
         const hasMultipleImages = connection.images && connection.images.length > 1;
+        const hasNewMessage = connection.hasNewMessage; // This comes from the profile data
         
         return (
           <div 
@@ -64,7 +65,12 @@ const ConnectionList = ({ connections, loading, onProfileClick }: ConnectionList
             </div>
             
             <div className="p-3">
-              <h3 className="font-medium">{connection.name}, {connection.age}</h3>
+              <div className="flex items-center gap-1">
+                <h3 className="font-medium">{connection.name}, {connection.age}</h3>
+                {hasNewMessage && (
+                  <CheckCircle size={14} className="fill-green-500 text-green-500" />
+                )}
+              </div>
               <p className="text-sm text-muted-foreground truncate">{connection.bio || "No bio available"}</p>
             </div>
           </div>
