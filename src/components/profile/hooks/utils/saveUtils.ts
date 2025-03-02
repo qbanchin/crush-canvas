@@ -1,3 +1,4 @@
+
 import { PhotoManagementState, PhotoManagementHandlers } from '../types/photoManagementTypes';
 import { convertBlobToBase64 } from './fileConversion';
 
@@ -39,9 +40,15 @@ export async function handleSavePhotos(
         
         for (let i = 0; i < previewUrls.length; i++) {
           try {
-            const base64Image = await convertBlobToBase64(previewUrls[i]);
-            processedImages.push(base64Image);
-            console.log(`Successfully processed image ${i+1}/${previewUrls.length}`);
+            // Check if the URL is already a base64 string
+            if (previewUrls[i].startsWith('data:')) {
+              processedImages.push(previewUrls[i]);
+              console.log(`Image ${i+1} is already in base64 format`);
+            } else {
+              const base64Image = await convertBlobToBase64(previewUrls[i]);
+              processedImages.push(base64Image);
+              console.log(`Successfully processed image ${i+1}/${previewUrls.length}`);
+            }
           } catch (error) {
             console.error(`Error processing image ${i+1}:`, error);
             toast({

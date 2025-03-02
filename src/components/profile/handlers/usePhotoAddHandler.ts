@@ -43,6 +43,7 @@ export const usePhotoAddHandler = (
       }
       
       console.log("Adding photos:", newPhotos.length);
+      console.log("Current images:", user.images.length);
       
       // Create a copy of existing images and add new ones
       const updatedImages = [...user.images];
@@ -72,6 +73,7 @@ export const usePhotoAddHandler = (
       }
       
       console.log("Valid photos added to array:", validPhotosCount);
+      console.log("Final images array length:", updatedImages.length);
       
       if (updatedImages.length === 0) {
         // If all photos were invalid, keep placeholder

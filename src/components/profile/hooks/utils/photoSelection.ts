@@ -56,7 +56,8 @@ export function handleFileSelect(
       
       // Update state with compressed images
       setState(prev => {
-        console.log("Updated preview URLs with compressed images:", compressedImages);
+        console.log("Current preview URLs:", prev.previewUrls.length);
+        console.log("Adding compressed images:", compressedImages.length);
         
         return {
           ...prev,
