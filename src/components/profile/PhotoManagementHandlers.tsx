@@ -21,6 +21,7 @@ const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ chil
         return;
       }
       
+      console.log("Adding photos:", newPhotos);
       const updatedImages = [...user.images, ...newPhotos];
       
       const { error } = await supabase
@@ -61,6 +62,8 @@ const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ chil
         });
         return;
       }
+      
+      console.log("Reordering photos:", reorderedPhotos);
       
       const { error } = await supabase
         .from('cards')
@@ -103,6 +106,8 @@ const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ chil
         return;
       }
       
+      console.log("Deleting photo at index:", index);
+      
       const updatedImages = [...user.images];
       updatedImages.splice(index, 1);
       
@@ -134,7 +139,6 @@ const PhotoManagementHandlers: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  // Make sure we explicitly pass these handlers to all children
   return (
     <>
       {React.Children.map(children, child => {
