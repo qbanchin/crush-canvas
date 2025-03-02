@@ -34,7 +34,7 @@ const NavBar: React.FC<NavBarProps> = ({ className }) => {
         )}
       >
         <MessageSquare size={24} />
-        <span>Matches</span>
+        <span>Connections</span>
       </NavLink>
       
       <NavLink 

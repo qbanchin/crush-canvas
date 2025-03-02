@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import HeaderBar from '@/components/HeaderBar';
@@ -12,7 +11,6 @@ const MatchesPage = () => {
   const [currentUserID, setCurrentUserID] = useState("temp-user-id"); // Will be replaced with auth user ID later
 
   useEffect(() => {
-    // Fetch matches from the backend
     const fetchMatches = async () => {
       try {
         setLoading(true);
@@ -45,7 +43,7 @@ const MatchesPage = () => {
       <HeaderBar />
 
       <main className="flex-1 p-4 mt-16 mb-20 max-w-3xl mx-auto w-full">
-        <h1 className="text-2xl font-bold mb-6">Your Matches</h1>
+        <h1 className="text-2xl font-bold mb-6">Your Connections</h1>
         
         {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -76,8 +74,8 @@ const MatchesPage = () => {
           </div>
         ) : (
           <div className="text-center py-12">
-            <h3 className="text-xl font-semibold mb-2">No matches yet</h3>
-            <p className="text-muted-foreground">Keep swiping to find your matches!</p>
+            <h3 className="text-xl font-semibold mb-2">No connections yet</h3>
+            <p className="text-muted-foreground">Keep swiping to find your connections!</p>
           </div>
         )}
       </main>
