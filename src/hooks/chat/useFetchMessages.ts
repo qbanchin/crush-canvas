@@ -61,6 +61,9 @@ export const useFetchMessages = (
             timestamp: new Date(msg.timestamp) // Ensure timestamp is a Date object
           }));
           setMessages(processedMessages);
+        } else {
+          console.log("No messages found or empty response");
+          setMessages([]);
         }
       } else {
         // Use test data

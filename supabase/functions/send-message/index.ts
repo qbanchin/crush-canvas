@@ -47,11 +47,11 @@ serve(async (req) => {
     
     console.log(`Sending message: ${messageId} from ${userId} to ${recipientId}`);
     
-    // Create messages table if it doesn't exist (using the stored procedure)
+    // Create the stored procedure if it doesn't exist
     const { error: procError } = await supabase.rpc('create_messages_table_if_not_exists');
     if (procError) {
       console.error("Error checking/creating messages table:", procError);
-      // Continue anyway - table might already exist
+      // Continue anyway - stored procedure or table might already exist
     }
     
     // Insert message into the database

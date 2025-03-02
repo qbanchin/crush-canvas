@@ -69,6 +69,36 @@ export type Database = {
         }
         Relationships: []
       }
+      messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          read: boolean
+          recipient_id: string
+          sender_id: string
+          timestamp: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          read?: boolean
+          recipient_id: string
+          sender_id: string
+          timestamp?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          read?: boolean
+          recipient_id?: string
+          sender_id?: string
+          timestamp?: string
+        }
+        Relationships: []
+      }
       notification_settings: {
         Row: {
           app_updates: boolean
@@ -110,7 +140,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_messages_table_if_not_exists: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
