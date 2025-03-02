@@ -51,37 +51,7 @@ export function useMessageSubscription({
       )
       .subscribe();
     
-    // For development - simulate a new message after 5 seconds from a random connection
-    if (import.meta.env.DEV) {
-      const timeout = setTimeout(() => {
-        if (connections.length > 0) {
-          const randomIndex = Math.floor(Math.random() * connections.length);
-          const randomConnection = connections[randomIndex];
-          
-          console.log("Simulating new message from:", randomConnection?.name);
-          
-          if (randomConnection) {
-            setUnreadMessages(prev => ({
-              ...prev,
-              [randomConnection.id]: true
-            }));
-            
-            setConnections(currentConnections => 
-              currentConnections.map(conn => 
-                conn.id === randomConnection.id 
-                  ? { ...conn, hasNewMessage: true } 
-                  : conn
-              )
-            );
-          }
-        }
-      }, 5000);
-      
-      return () => {
-        clearTimeout(timeout);
-        supabase.removeChannel(channel);
-      };
-    }
+    // REMOVED the problematic timeout that was causing continuous refreshes
     
     return () => {
       supabase.removeChannel(channel);
