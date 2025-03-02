@@ -17,7 +17,8 @@ const MatchesPage = () => {
     currentUserID, 
     useTestData, 
     toggleTestData,
-    clearNewMessageFlag
+    clearNewMessageFlag,
+    deleteConnection
   } = useConnectionsData();
   
   const {
@@ -55,6 +56,7 @@ const MatchesPage = () => {
           connections={connections}
           loading={loading}
           onProfileClick={handleProfileSelection}
+          onDeleteConnection={deleteConnection}
         />
       </main>
 

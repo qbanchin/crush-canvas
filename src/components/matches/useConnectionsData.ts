@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
-import { getCurrentUser, fetchConnectionsFromSupabase, getTestConnections } from './utils/connectionUtils';
+import { getCurrentUser, fetchConnectionsFromSupabase, getTestConnections, deleteConnectionFromSupabase, deleteTestConnection } from './utils/connectionUtils';
 import { useMessageSubscription } from './hooks/useMessageSubscription';
 import { ExtendedProfile, ConnectionsState, ConnectionsDataReturn } from './types/connectionTypes';
 
@@ -130,6 +130,47 @@ export function useConnectionsData(): ConnectionsDataReturn {
     }));
   }, []);
 
+  // Add function to delete a connection
+  const deleteConnection = useCallback(async (connectionId: string) => {
+    try {
+      setState(prev => ({ ...prev, loading: true }));
+
+      let success = false;
+      
+      if (!useTestData && currentUserID) {
+        // Delete from Supabase
+        success = await deleteConnectionFromSupabase(currentUserID, connectionId);
+      } else {
+        // Delete from test data
+        success = true;
+      }
+      
+      if (success) {
+        // Remove from local state
+        setState(prev => {
+          const updatedConnections = prev.connections.filter(
+            conn => conn.id !== connectionId
+          );
+          
+          return {
+            ...prev,
+            connections: updatedConnections,
+            loading: false
+          };
+        });
+        
+        toast.success("Connection removed successfully");
+      } else {
+        setState(prev => ({ ...prev, loading: false }));
+        toast.error("Failed to remove connection");
+      }
+    } catch (error) {
+      console.error("Error deleting connection:", error);
+      setState(prev => ({ ...prev, loading: false }));
+      toast.error("Something went wrong");
+    }
+  }, [currentUserID, useTestData]);
+
   const toggleTestData = useCallback(() => {
     setState(prev => ({
       ...prev,
@@ -144,6 +185,7 @@ export function useConnectionsData(): ConnectionsDataReturn {
     currentUserID,
     useTestData,
     toggleTestData,
-    clearNewMessageFlag
+    clearNewMessageFlag,
+    deleteConnection
   };
 }

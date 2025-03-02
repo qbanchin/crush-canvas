@@ -59,3 +59,30 @@ export const getTestConnections = (unreadMessages: Record<string, boolean>): Ext
   console.log("Test connections with message indicators:", testConnections);
   return testConnections;
 };
+
+// Delete a connection from Supabase
+export const deleteConnectionFromSupabase = async (userId: string, connectionId: string): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('delete-connection', {
+      body: { 
+        userId,
+        connectionId
+      }
+    });
+    
+    if (error) {
+      console.error("Error deleting connection:", error);
+      return false;
+    }
+    
+    return true;
+  } catch (err) {
+    console.error("Failed to delete connection:", err);
+    return false;
+  }
+};
+
+// Delete a test connection
+export const deleteTestConnection = (connections: ExtendedProfile[], connectionId: string): ExtendedProfile[] => {
+  return connections.filter(connection => connection.id !== connectionId);
+};

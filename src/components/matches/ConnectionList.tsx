@@ -1,15 +1,22 @@
 
 import { Profile } from '@/data/profiles';
-import { ImageIcon, MessageCircle, Circle } from 'lucide-react';
+import { ImageIcon, MessageCircle, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface ConnectionListProps {
   connections: Profile[];
   loading: boolean;
   onProfileClick: (profileId: string) => void;
+  onDeleteConnection?: (profileId: string) => void;
 }
 
-const ConnectionList = ({ connections, loading, onProfileClick }: ConnectionListProps) => {
+const ConnectionList = ({ 
+  connections, 
+  loading, 
+  onProfileClick, 
+  onDeleteConnection 
+}: ConnectionListProps) => {
   if (loading) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -44,10 +51,12 @@ const ConnectionList = ({ connections, loading, onProfileClick }: ConnectionList
         return (
           <div 
             key={connection.id} 
-            className="flex flex-col border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-            onClick={() => onProfileClick(connection.id)}
+            className="flex flex-col border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow relative"
           >
-            <div className="relative">
+            <div 
+              className="relative cursor-pointer" 
+              onClick={() => onProfileClick(connection.id)}
+            >
               <div 
                 className="h-40 bg-cover bg-center hover:opacity-90 transition-opacity" 
                 style={{ 
@@ -66,13 +75,42 @@ const ConnectionList = ({ connections, loading, onProfileClick }: ConnectionList
             </div>
             
             <div className="p-3">
-              <div className="flex items-center gap-2">
-                {hasNewMessage && (
-                  <span className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0"></span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {hasNewMessage && (
+                    <span className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0"></span>
+                  )}
+                  <h3 
+                    className="font-medium cursor-pointer" 
+                    onClick={() => onProfileClick(connection.id)}
+                  >
+                    {connection.name}, {connection.age}
+                  </h3>
+                </div>
+                
+                {onDeleteConnection && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-7 w-7" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (confirm(`Remove ${connection.name} from your connections?`)) {
+                        onDeleteConnection(connection.id);
+                      }
+                    }}
+                    aria-label="Delete connection"
+                  >
+                    <XCircle className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                  </Button>
                 )}
-                <h3 className="font-medium">{connection.name}, {connection.age}</h3>
               </div>
-              <p className="text-sm text-muted-foreground truncate">{connection.bio || "No bio available"}</p>
+              <p 
+                className="text-sm text-muted-foreground truncate cursor-pointer"
+                onClick={() => onProfileClick(connection.id)}
+              >
+                {connection.bio || "No bio available"}
+              </p>
             </div>
           </div>
         );
