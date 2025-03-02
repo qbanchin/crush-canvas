@@ -3,17 +3,22 @@ import { PhotoManagementState } from '../types/photoManagementTypes';
 
 export function handleDeleteExistingPhoto(
   index: number,
-  editablePhotos: string[],
-  onPhotoDeleted: ((index: number) => void) | undefined,
+  state: PhotoManagementState,
+  handlers: { onPhotoDeleted?: (index: number) => void },
   setState: React.Dispatch<React.SetStateAction<PhotoManagementState>>,
-  toast: any
+  toast?: any
 ) {
+  const { editablePhotos } = state;
+  const { onPhotoDeleted } = handlers;
+  
   if (editablePhotos.length <= 1) {
-    toast({
-      title: "Cannot delete image",
-      description: "You must have at least one profile photo.",
-      variant: "destructive"
-    });
+    if (toast) {
+      toast({
+        title: "Cannot delete image",
+        description: "You must have at least one profile photo.",
+        variant: "destructive"
+      });
+    }
     return;
   }
   
@@ -31,10 +36,12 @@ export function handleDeleteExistingPhoto(
     });
   } else {
     console.error("Photo delete handler not available");
-    toast({
-      title: "Photo deletion currently unavailable",
-      description: "Please try again later.",
-      variant: "destructive"
-    });
+    if (toast) {
+      toast({
+        title: "Photo deletion currently unavailable",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    }
   }
 }

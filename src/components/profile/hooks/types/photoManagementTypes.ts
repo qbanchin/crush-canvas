@@ -16,7 +16,7 @@ export interface PhotoManagementHandlers {
 
 export interface PhotoManagementActions {
   handleOpenDialog: () => void;
-  handleCloseDialog: () => void;
+  handleCloseDialog: (open: boolean) => void;
   handleChangeTab: (tab: string) => void;
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemovePhoto: (index: number) => void;

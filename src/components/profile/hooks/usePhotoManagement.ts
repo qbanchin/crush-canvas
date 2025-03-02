@@ -40,9 +40,8 @@ export const usePhotoManagement = (
   // Save and delete handlers
   const savePhotosHandler = () => 
     handleSavePhotos(state, handlers, setState, toast);
-  const deleteExistingPhotoHandler = (index: number) => {
-    handleDeleteExistingPhoto(index, state, handlers, setState);
-  };
+  const deleteExistingPhotoHandler = (index: number) => 
+    handleDeleteExistingPhoto(index, state, handlers, setState, toast);
 
   // Drag and drop handlers
   const dragStartHandler = (index: number) => 
