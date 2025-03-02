@@ -37,7 +37,34 @@ const Index = () => {
           return;
         }
 
-        const { data, error } = await supabase.functions.invoke('get-cards');
+        // First, fetch all existing connections and rejected profiles
+        const { data: connectionsData, error: connectionsError } = await supabase.functions.invoke('get-matches');
+        
+        if (connectionsError) {
+          console.error("Error fetching connections:", connectionsError);
+        }
+        
+        // Extract connection IDs and rejected profile IDs
+        const connectionIds: string[] = [];
+        const rejectedIds: string[] = [];
+        
+        if (connectionsData && Array.isArray(connectionsData)) {
+          connectionsData.forEach((connection: any) => {
+            // If is_match is true, it's a connection, otherwise it was rejected
+            if (connection.is_match) {
+              connectionIds.push(connection.id);
+            } else {
+              rejectedIds.push(connection.id);
+            }
+          });
+        }
+        
+        // Now fetch profiles, filtering out connections and rejected ones on the server
+        const { data, error } = await supabase.functions.invoke('get-cards', {
+          body: {
+            excludeIds: [...connectionIds, ...rejectedIds]
+          }
+        });
         
         if (error) {
           console.error("Error fetching profiles:", error);
@@ -48,6 +75,7 @@ const Index = () => {
         if (data && Array.isArray(data)) {
           // Filter out the current user's profile
           const filteredProfiles = data.filter(profile => profile.id !== userId);
+          console.log(`Loaded ${filteredProfiles.length} profiles, excluded ${connectionIds.length} connections and ${rejectedIds.length} rejected profiles`);
           setProfiles(filteredProfiles);
         }
       } catch (error) {
