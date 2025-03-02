@@ -1,148 +1,47 @@
 
-import { useState, useEffect } from 'react';
-import { toast } from 'sonner';
+import React from 'react';
 import HeaderBar from '@/components/HeaderBar';
 import NavBar from '@/components/NavBar';
-import { supabase } from '@/integrations/supabase/client';
-import { Profile, profiles } from '@/data/profiles';
 import ConnectionList from '@/components/matches/ConnectionList';
 import ProfileDialog from '@/components/matches/ProfileDialog';
 import ConnectionChat from '@/components/ConnectionChat';
+import { useConnectionsData } from '@/components/matches/useConnectionsData';
+import { useDialogsState } from '@/components/matches/useDialogsState';
+import ConnectionsHeader from '@/components/matches/ConnectionsHeader';
 
 const MatchesPage = () => {
-  const [connections, setConnections] = useState<Profile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [currentUserID, setCurrentUserID] = useState<string | null>(null);
-  const [useTestData, setUseTestData] = useState(false);
-  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
-  const [chatOpen, setChatOpen] = useState(false);
-
-  useEffect(() => {
-    // Get current authenticated user
-    const getCurrentUser = async () => {
-      try {
-        const { data } = await supabase.auth.getUser();
-        if (data?.user) {
-          setCurrentUserID(data.user.id);
-          return data.user.id;
-        }
-        // Fall back to test user id for development
-        const tempUserId = "temp-user-id";
-        setCurrentUserID(tempUserId);
-        return tempUserId;
-      } catch (error) {
-        console.error("Error getting current user:", error);
-        const tempUserId = "temp-user-id";
-        setCurrentUserID(tempUserId);
-        return tempUserId;
-      }
-    };
-
-    const fetchConnections = async () => {
-      try {
-        setLoading(true);
-        
-        // Get the current user ID first
-        const userId = await getCurrentUser();
-        
-        // Try to fetch from Supabase first
-        if (!useTestData) {
-          try {
-            const { data, error } = await supabase.functions.invoke('get-matches', {
-              body: { userId }
-            });
-            
-            if (error) {
-              console.error("Error fetching connections:", error);
-              toast.error("Using test data instead of backend");
-              setUseTestData(true);
-            } else if (data && Array.isArray(data)) {
-              console.log("Connections loaded:", data.length);
-              setConnections(data);
-              setLoading(false);
-              return;
-            }
-          } catch (err) {
-            console.error("Failed to fetch connections:", err);
-            toast.error("Using test data as fallback");
-            setUseTestData(true);
-          }
-        }
-        
-        // Fall back to test data if Supabase call fails or useTestData is true
-        if (useTestData) {
-          // Simulate a short loading delay for test data
-          setTimeout(() => {
-            // Use 3 random profiles from the local data as connections
-            const testConnections = [...profiles]
-              .sort(() => 0.5 - Math.random())
-              .slice(0, 3);
-            
-            setConnections(testConnections);
-            setLoading(false);
-          }, 800);
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        toast.error("Something went wrong");
-        setLoading(false);
-      }
-    };
-
-    fetchConnections();
-  }, [useTestData]);
-
-  const toggleTestData = () => {
-    setUseTestData(prev => !prev);
-    setLoading(true);
-  };
-
-  const handleProfileClick = (profileId: string) => {
-    // Find the profile in connections
-    const profile = connections.find(p => p.id === profileId);
-    if (profile) {
-      setSelectedProfile(profile);
-    }
-  };
-
-  const handleOpenChat = () => {
-    if (selectedProfile) {
-      setChatOpen(true);
-    }
-  };
-
-  const handleChatClose = (open: boolean) => {
-    setChatOpen(open);
-    // If chat is closed and there was an error, reset selected profile
-    if (!open && !selectedProfile) {
-      setSelectedProfile(null);
-    }
-  };
-
-  const handleMessageSent = () => {
-    // This is called when a message is sent successfully
-    // We could use this to refresh connections if needed
-  };
+  const { 
+    connections, 
+    loading, 
+    currentUserID, 
+    useTestData, 
+    toggleTestData 
+  } = useConnectionsData();
+  
+  const {
+    selectedProfile,
+    setSelectedProfile,
+    chatOpen,
+    handleProfileClick,
+    handleOpenChat,
+    handleChatClose,
+    handleMessageSent
+  } = useDialogsState();
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <HeaderBar />
 
       <main className="flex-1 p-4 mt-16 mb-20 max-w-3xl mx-auto w-full">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Your Connections</h1>
-          <button 
-            onClick={toggleTestData}
-            className="text-sm px-3 py-1 rounded-full bg-muted hover:bg-muted/80 transition-colors"
-          >
-            {useTestData ? "Try API" : "Use Test Data"}
-          </button>
-        </div>
+        <ConnectionsHeader 
+          useTestData={useTestData} 
+          toggleTestData={toggleTestData} 
+        />
         
         <ConnectionList 
           connections={connections}
           loading={loading}
-          onProfileClick={handleProfileClick}
+          onProfileClick={(profileId) => handleProfileClick(profileId, connections)}
         />
       </main>
 
