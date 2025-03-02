@@ -1,46 +1,102 @@
 
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { MenuIcon, XIcon, ChevronLeftIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
-interface HeaderBarProps {
-  className?: string;
-}
-
-const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
+const HeaderBar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
   
-  // Determine the title based on the current route
-  let title = "Discover";
-  if (location.pathname === "/matches") {
-    title = "Connections";
-  } else if (location.pathname === "/profile") {
-    title = "Profile";
-  }
+  const isAuthPage = location.pathname === '/auth';
+  const showBackButton = location.pathname !== '/' && location.pathname !== '/matches' && !isAuthPage;
+
+  const getTitle = () => {
+    const path = location.pathname;
+    if (path === '/') return 'Discover';
+    if (path === '/matches') return 'Connections';
+    if (path === '/profile') return 'Profile';
+    if (path === '/auth') return 'Account';
+    if (path.includes('/settings/explore')) return 'Discover Settings';
+    if (path.includes('/settings/privacy')) return 'Privacy Settings';
+    if (path.includes('/settings/notifications')) return 'Notifications';
+    if (path === '/help') return 'Help & Support';
+    return '';
+  };
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success('Logged out successfully');
+      navigate('/auth');
+    } catch (error: any) {
+      toast.error('Error logging out: ' + error.message);
+    }
+    setMenuOpen(false);
+  };
 
   return (
-    <header className={cn(
-      "fixed top-0 left-0 right-0 flex justify-center items-center h-16 bg-background/80 backdrop-blur-md border-b z-10",
-      className
-    )}>
+    <header className="fixed top-0 left-0 right-0 h-16 bg-background border-b border-border z-50 px-4 flex items-center justify-between">
       <div className="flex items-center">
-        {title === "Discover" && (
-          <div className="flex flex-col items-center">
-            <img 
-              src="/lovable-uploads/290973f2-f16b-4e56-8cfe-afb3b85e2239.png" 
-              alt="Global Love" 
-              className="h-14 w-14 object-contain mt-7" 
-            />
-            <div className="text-sm font-semibold mt-2">
-              <span className="text-secondary">Single</span>
-              <span className="text-primary">Expats</span>
-            </div>
-          </div>
-        )}
-        {title !== "Discover" && (
-          <h1 className="text-lg font-semibold">{title}</h1>
-        )}
+        {showBackButton ? (
+          <button 
+            onClick={() => navigate(-1)} 
+            className="mr-3 p-1 rounded-full hover:bg-muted"
+          >
+            <ChevronLeftIcon className="w-5 h-5" />
+          </button>
+        ) : null}
+        
+        <h1 className="text-lg font-semibold">{getTitle()}</h1>
       </div>
+      
+      {!isAuthPage && (
+        <div className="relative">
+          <button 
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="p-2 rounded-full hover:bg-muted"
+          >
+            {menuOpen ? <XIcon size={20} /> : <MenuIcon size={20} />}
+          </button>
+          
+          {menuOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-card rounded-md shadow-lg border border-border overflow-hidden z-50">
+              <div className="py-1">
+                <Link 
+                  to="/profile" 
+                  className="block px-4 py-2 text-sm hover:bg-muted"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Profile
+                </Link>
+                <Link 
+                  to="/settings/explore" 
+                  className="block px-4 py-2 text-sm hover:bg-muted"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Settings
+                </Link>
+                <Link 
+                  to="/help" 
+                  className="block px-4 py-2 text-sm hover:bg-muted"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Help
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left px-4 py-2 text-sm hover:bg-muted text-destructive"
+                >
+                  Log out
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </header>
   );
 };
