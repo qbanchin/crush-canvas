@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 
@@ -64,7 +63,7 @@ export const usePhotoManagement = ({
         return;
       }
 
-      if (onPhotosAdded) {
+      if (typeof onPhotosAdded === 'function') {
         onPhotosAdded(previewUrls);
         
         setSelectedFiles([]);
@@ -73,6 +72,7 @@ export const usePhotoManagement = ({
           title: "Photos added",
           description: `${selectedFiles.length} photo(s) added to your profile.`
         });
+        setIsDialogOpen(false);
       } else {
         console.error("Photo upload handler not available");
         toast({
@@ -81,14 +81,14 @@ export const usePhotoManagement = ({
           variant: "destructive"
         });
       }
-      setIsDialogOpen(false);
     } else {
-      if (onPhotosReordered) {
+      if (typeof onPhotosReordered === 'function') {
         onPhotosReordered(editablePhotos);
         toast({
           title: "Photos updated",
           description: "Your photo order has been updated."
         });
+        setIsDialogOpen(false);
       } else {
         console.error("Photo reorder handler not available");
         toast({
@@ -97,7 +97,6 @@ export const usePhotoManagement = ({
           variant: "destructive"
         });
       }
-      setIsDialogOpen(false);
     }
   };
 
