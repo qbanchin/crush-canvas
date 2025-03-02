@@ -22,9 +22,10 @@ export function useDialogsState() {
 
   const handleChatClose = (open: boolean) => {
     setChatOpen(open);
-    // If chat is closed and there was an error, reset selected profile
-    if (!open && !selectedProfile) {
-      setSelectedProfile(null);
+    // Only reset selected profile when chat is closed
+    if (!open) {
+      // Don't reset the selected profile when chat is closed
+      // This was causing the issue where chat couldn't work between profiles
     }
   };
 
