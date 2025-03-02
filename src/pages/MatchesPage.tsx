@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -6,6 +5,16 @@ import HeaderBar from '@/components/HeaderBar';
 import NavBar from '@/components/NavBar';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, profiles } from '@/data/profiles';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle,
+  DialogFooter,
+  DialogDescription
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 
 const MatchesPage = () => {
   const navigate = useNavigate();
@@ -13,6 +22,10 @@ const MatchesPage = () => {
   const [loading, setLoading] = useState(true);
   const [currentUserID, setCurrentUserID] = useState("temp-user-id"); // Will be replaced with auth user ID later
   const [useTestData, setUseTestData] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
+  const [messageDialogOpen, setMessageDialogOpen] = useState(false);
+  const [messageText, setMessageText] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
 
   useEffect(() => {
     const fetchConnections = async () => {
@@ -65,12 +78,61 @@ const MatchesPage = () => {
   };
 
   const handleProfileClick = (profileId: string) => {
-    // In a real app, you would navigate to a detailed profile view
-    // For now, we'll just show a toast message
-    toast.info(`Viewing profile ${profileId}`);
-    
-    // Potentially navigate to a profile detail page in the future
-    // navigate(`/profile/${profileId}`);
+    // Find the profile in connections
+    const profile = connections.find(p => p.id === profileId);
+    if (profile) {
+      setSelectedProfile(profile);
+      // We no longer show a toast, instead we open the profile dialog
+    }
+  };
+
+  const handleOpenMessageDialog = () => {
+    if (selectedProfile) {
+      setMessageDialogOpen(true);
+    }
+  };
+
+  const handleCloseMessageDialog = () => {
+    setMessageDialogOpen(false);
+    setMessageText('');
+  };
+
+  const handleSendMessage = async () => {
+    if (!messageText.trim() || !selectedProfile) {
+      return;
+    }
+
+    setSendingMessage(true);
+
+    try {
+      // In a real app, this would send the message to your backend
+      if (!useTestData) {
+        // Try to use Supabase function
+        const { data, error } = await supabase.functions.invoke('send-message', {
+          body: { 
+            userId: currentUserID,
+            recipientId: selectedProfile.id,
+            message: messageText
+          }
+        });
+        
+        if (error) {
+          console.error("Error sending message:", error);
+          throw new Error("Failed to send message");
+        }
+      } else {
+        // Just simulate a delay for test data
+        await new Promise(resolve => setTimeout(resolve, 800));
+      }
+      
+      toast.success(`Message sent to ${selectedProfile.name}`);
+      handleCloseMessageDialog();
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Failed to send message");
+    } finally {
+      setSendingMessage(false);
+    }
   };
 
   return (
@@ -125,6 +187,85 @@ const MatchesPage = () => {
       </main>
 
       <NavBar />
+
+      {/* Profile Dialog */}
+      {selectedProfile && (
+        <Dialog open={!!selectedProfile} onOpenChange={(open) => !open && setSelectedProfile(null)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>{selectedProfile.name}, {selectedProfile.age}</DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground">
+                {selectedProfile.distance} miles away
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid gap-4 py-4">
+              <div 
+                className="h-60 bg-cover bg-center rounded-md" 
+                style={{ backgroundImage: `url(${selectedProfile.images[0]})` }}
+              ></div>
+              
+              <p>{selectedProfile.bio}</p>
+              
+              {selectedProfile.tags && selectedProfile.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {selectedProfile.tags.map((tag, index) => (
+                    <span key={index} className="px-2 py-1 bg-muted text-xs rounded-full">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <DialogFooter className="sm:justify-start">
+              <Button 
+                onClick={handleOpenMessageDialog}
+                className="w-full sm:w-auto"
+              >
+                Send Message
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Message Dialog */}
+      <Dialog open={messageDialogOpen} onOpenChange={setMessageDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Send Message to {selectedProfile?.name}</DialogTitle>
+            <DialogDescription>
+              Start a conversation with your connection.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <Textarea
+              placeholder="Write your message here..."
+              value={messageText}
+              onChange={(e) => setMessageText(e.target.value)}
+              className="min-h-[100px]"
+            />
+          </div>
+          
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={handleCloseMessageDialog}
+              disabled={sendingMessage}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSendMessage}
+              disabled={!messageText.trim() || sendingMessage}
+            >
+              {sendingMessage ? "Sending..." : "Send Message"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
