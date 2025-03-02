@@ -1,6 +1,7 @@
 
 import { Profile } from '@/data/profiles';
-import { ImageIcon, MessageCircle } from 'lucide-react';
+import { ImageIcon, MessageCircle, Circle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface ConnectionListProps {
   connections: Profile[];
@@ -68,7 +69,9 @@ const ConnectionList = ({ connections, loading, onProfileClick }: ConnectionList
               <div className="flex items-center gap-1">
                 <h3 className="font-medium">{connection.name}, {connection.age}</h3>
                 {hasNewMessage && (
-                  <MessageCircle size={14} className="text-green-500 fill-green-500" />
+                  <div className="relative flex items-center">
+                    <span className="block h-2 w-2 rounded-full bg-green-500"></span>
+                  </div>
                 )}
               </div>
               <p className="text-sm text-muted-foreground truncate">{connection.bio || "No bio available"}</p>
