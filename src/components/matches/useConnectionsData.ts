@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
-import { getCurrentUser, fetchConnectionsFromSupabase, getTestConnections, deleteConnectionFromSupabase, deleteTestConnection } from './utils/connectionUtils';
+import { getCurrentUser, fetchConnectionsFromSupabase, getTestConnections, deleteConnectionFromSupabase } from './utils/connectionUtils';
 import { useMessageSubscription } from './hooks/useMessageSubscription';
 import { ExtendedProfile, ConnectionsState, ConnectionsDataReturn } from './types/connectionTypes';
 
@@ -141,23 +141,25 @@ export function useConnectionsData(): ConnectionsDataReturn {
         // Delete from Supabase
         success = await deleteConnectionFromSupabase(currentUserID, connectionId);
       } else {
-        // Delete from test data
+        // For test data, we'll just filter out the connection locally
+        setState(prev => ({
+          ...prev,
+          connections: prev.connections.filter(conn => conn.id !== connectionId)
+        }));
         success = true;
       }
       
       if (success) {
-        // Remove from local state
-        setState(prev => {
-          const updatedConnections = prev.connections.filter(
-            conn => conn.id !== connectionId
-          );
-          
-          return {
+        // If using Supabase and the deletion was successful, update the local state
+        if (!useTestData) {
+          setState(prev => ({
             ...prev,
-            connections: updatedConnections,
+            connections: prev.connections.filter(conn => conn.id !== connectionId),
             loading: false
-          };
-        });
+          }));
+        } else {
+          setState(prev => ({ ...prev, loading: false }));
+        }
         
         toast.success("Connection removed successfully");
       } else {
