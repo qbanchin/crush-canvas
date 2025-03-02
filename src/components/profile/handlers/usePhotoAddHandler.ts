@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
@@ -28,6 +29,8 @@ export const usePhotoAddHandler = (
         throw new Error("No photos provided for upload");
       }
 
+      console.log("Starting photo upload process with", newPhotos.length, "photos");
+
       const { data: { user: authUser } } = await supabase.auth.getUser();
       
       if (!authUser) {
@@ -46,10 +49,12 @@ export const usePhotoAddHandler = (
       
       // Filter out placeholder image if it's the only one
       if (updatedImages.length === 1 && updatedImages[0] === '/placeholder.svg') {
+        console.log("Removing placeholder image before adding new photos");
         updatedImages.length = 0;
       }
       
       // Validate each photo before adding
+      let validPhotosCount = 0;
       for (const photo of newPhotos) {
         if (!photo || typeof photo !== 'string') {
           console.error("Invalid photo format detected", photo);
@@ -63,7 +68,10 @@ export const usePhotoAddHandler = (
         }
         
         updatedImages.push(photo);
+        validPhotosCount++;
       }
+      
+      console.log("Valid photos added to array:", validPhotosCount);
       
       if (updatedImages.length === 0) {
         // If all photos were invalid, keep placeholder
@@ -72,15 +80,19 @@ export const usePhotoAddHandler = (
       }
       
       // Update the database
-      const { error } = await supabase
+      console.log("Updating Supabase with", updatedImages.length, "photos");
+      const { error, data } = await supabase
         .from('cards')
         .update({ images: updatedImages })
-        .eq('id', authUser.id);
+        .eq('id', authUser.id)
+        .select();
       
       if (error) {
         console.error("Supabase error updating images:", error);
         throw error;
       }
+      
+      console.log("Database update successful, response:", data);
       
       // Update local state
       setUser({
@@ -90,7 +102,7 @@ export const usePhotoAddHandler = (
       
       toast({
         title: "Photos added",
-        description: `${newPhotos.length} photo(s) added to your profile.`
+        description: `${validPhotosCount} photo(s) added to your profile.`
       });
     } catch (error: any) {
       console.error("Error adding photos:", error);

@@ -35,19 +35,39 @@ export async function handleSavePhotos(
     if (typeof onPhotosAdded === 'function') {
       try {
         // Convert all blob URLs to base64
-        const base64Images = await Promise.all(
-          previewUrls.map(url => convertBlobToBase64(url))
-        );
+        console.log("Processing images for upload, count:", previewUrls.length);
+        const processedImages: string[] = [];
+        
+        for (let i = 0; i < previewUrls.length; i++) {
+          try {
+            const base64Image = await convertBlobToBase64(previewUrls[i]);
+            processedImages.push(base64Image);
+            console.log(`Successfully processed image ${i+1}/${previewUrls.length}`);
+          } catch (error) {
+            console.error(`Error processing image ${i+1}:`, error);
+            toast({
+              title: `Error processing image ${i+1}`,
+              description: "Skipping this image. Please try with a different one.",
+              variant: "destructive"
+            });
+          }
+        }
+        
+        if (processedImages.length === 0) {
+          throw new Error("Failed to process any of the selected images");
+        }
         
         // Make sure we're passing the processed URLs to the handler
-        console.log("Calling onPhotosAdded with processed images");
-        onPhotosAdded(base64Images);
+        console.log("Calling onPhotosAdded with processed images:", processedImages.length);
+        onPhotosAdded(processedImages);
         
         // Clean up object URLs after successful upload
         setTimeout(() => {
           previewUrls.forEach(url => {
             try {
-              URL.revokeObjectURL(url);
+              if (url.startsWith('blob:')) {
+                URL.revokeObjectURL(url);
+              }
             } catch (e) {
               console.error("Error revoking URL:", e);
             }
