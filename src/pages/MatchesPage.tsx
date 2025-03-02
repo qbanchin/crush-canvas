@@ -1,125 +1,88 @@
 
-import React from 'react';
-import { profiles, Profile } from '@/data/profiles';
+import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import HeaderBar from '@/components/HeaderBar';
 import NavBar from '@/components/NavBar';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { Profile } from '@/data/profiles';
 
 const MatchesPage = () => {
-  // Sample matches (using a subset of profiles)
-  const matches = profiles.slice(0, 3);
-  
-  // Sample conversations
-  const conversations = [
-    { profile: profiles[0], lastMessage: "Hey! How's your day going?", time: "10:30 AM", unread: true },
-    { profile: profiles[2], lastMessage: "That coffee place was amazing, thanks for the recommendation!", time: "Yesterday", unread: false },
-  ];
+  const [matches, setMatches] = useState<Profile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentUserID, setCurrentUserID] = useState("temp-user-id"); // Will be replaced with auth user ID later
+
+  useEffect(() => {
+    // Fetch matches from the backend
+    const fetchMatches = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase.functions.invoke('get-matches', {
+          body: { userId: currentUserID }
+        });
+        
+        if (error) {
+          console.error("Error fetching matches:", error);
+          toast.error("Failed to load matches");
+          return;
+        }
+        
+        if (data && Array.isArray(data)) {
+          setMatches(data);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error("Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMatches();
+  }, [currentUserID]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="flex flex-col min-h-screen bg-background">
       <HeaderBar />
-      
-      <main className="flex-1 pt-16 pb-20">
-        <ScrollArea className="h-[calc(100vh-9rem)]">
-          <div className="px-4 py-6">
-            <div className="mb-8">
-              <h2 className="text-lg font-semibold mb-4">New Matches</h2>
-              
-              {matches.length > 0 ? (
-                <div className="flex gap-4 overflow-x-auto pb-4">
-                  {matches.map(match => (
-                    <MatchCard key={match.id} profile={match} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-6 bg-muted/30 rounded-xl">
-                  <p className="text-muted-foreground">No new matches yet</p>
-                </div>
-              )}
-            </div>
-            
-            <div>
-              <h2 className="text-lg font-semibold mb-4">Messages</h2>
-              
-              {conversations.length > 0 ? (
-                <div className="space-y-3">
-                  {conversations.map(convo => (
-                    <ConversationCard 
-                      key={convo.profile.id} 
-                      profile={convo.profile}
-                      lastMessage={convo.lastMessage}
-                      time={convo.time}
-                      unread={convo.unread}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-6 bg-muted/30 rounded-xl">
-                  <p className="text-muted-foreground">No messages yet</p>
-                </div>
-              )}
-            </div>
+
+      <main className="flex-1 p-4 mt-16 mb-20 max-w-3xl mx-auto w-full">
+        <h1 className="text-2xl font-bold mb-6">Your Matches</h1>
+        
+        {loading ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="animate-pulse flex flex-col">
+                <div className="h-32 w-full bg-muted rounded-xl"></div>
+                <div className="mt-2 h-4 w-20 bg-muted rounded"></div>
+              </div>
+            ))}
           </div>
-        </ScrollArea>
-      </main>
-      
-      <NavBar />
-    </div>
-  );
-};
-
-interface MatchCardProps {
-  profile: Profile;
-}
-
-const MatchCard: React.FC<MatchCardProps> = ({ profile }) => {
-  return (
-    <div className="flex flex-col items-center">
-      <div className="w-16 h-16 rounded-full border-2 border-primary overflow-hidden mb-2">
-        <div 
-          className="w-full h-full bg-cover bg-center" 
-          style={{ backgroundImage: `url(${profile.images[0]})` }}
-        />
-      </div>
-      <span className="text-sm font-medium">{profile.name}</span>
-    </div>
-  );
-};
-
-interface ConversationCardProps {
-  profile: Profile;
-  lastMessage: string;
-  time: string;
-  unread: boolean;
-}
-
-const ConversationCard: React.FC<ConversationCardProps> = ({ 
-  profile, lastMessage, time, unread 
-}) => {
-  return (
-    <div className="flex items-center gap-3 p-3 rounded-xl transition-colors hover:bg-muted/30 cursor-pointer">
-      <div className="relative">
-        <div className="w-14 h-14 rounded-full overflow-hidden">
-          <div 
-            className="w-full h-full bg-cover bg-center" 
-            style={{ backgroundImage: `url(${profile.images[0]})` }}
-          />
-        </div>
-        {unread && (
-          <div className="absolute -right-1 -bottom-1 w-4 h-4 rounded-full bg-primary border-2 border-background" />
+        ) : matches.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {matches.map((match) => (
+              <div 
+                key={match.id} 
+                className="flex flex-col border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow"
+              >
+                <div 
+                  className="h-40 bg-cover bg-center" 
+                  style={{ backgroundImage: `url(${match.images[0]})` }}
+                ></div>
+                <div className="p-3">
+                  <h3 className="font-medium">{match.name}, {match.age}</h3>
+                  <p className="text-sm text-muted-foreground truncate">{match.bio}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <h3 className="text-xl font-semibold mb-2">No matches yet</h3>
+            <p className="text-muted-foreground">Keep swiping to find your matches!</p>
+          </div>
         )}
-      </div>
-      
-      <div className="flex-1 min-w-0">
-        <div className="flex justify-between items-baseline">
-          <h3 className="font-medium">{profile.name}</h3>
-          <span className="text-xs text-muted-foreground">{time}</span>
-        </div>
-        <p className={`text-sm truncate ${unread ? 'font-medium' : 'text-muted-foreground'}`}>
-          {lastMessage}
-        </p>
-      </div>
+      </main>
+
+      <NavBar />
     </div>
   );
 };

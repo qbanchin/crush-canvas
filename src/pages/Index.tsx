@@ -1,84 +1,121 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import TinderCard from '@/components/TinderCard';
 import MatchAnimation from '@/components/MatchAnimation';
 import HeaderBar from '@/components/HeaderBar';
 import NavBar from '@/components/NavBar';
-import { profiles, Profile } from '@/data/profiles';
-import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { Profile } from '@/data/profiles';
 
 const Index = () => {
-  const [currentProfiles, setCurrentProfiles] = useState<Profile[]>([...profiles]);
-  const [showMatch, setShowMatch] = useState<Profile | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  // Reset to all profiles if we run out
-  useEffect(() => {
-    if (currentProfiles.length === 0) {
-      setTimeout(() => {
-        setCurrentProfiles([...profiles]);
-        toast({
-          title: "New profiles available!",
-          description: "We've refreshed your deck with new people to discover.",
-        });
-      }, 500);
-    }
-  }, [currentProfiles]);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showMatch, setShowMatch] = useState(false);
+  const [matchedProfile, setMatchedProfile] = useState<Profile | null>(null);
+  const [currentUserID, setCurrentUserID] = useState("temp-user-id"); // Will be replaced with auth user ID later
 
-  const handleSwipe = (direction: 'left' | 'right') => {
-    // Show match animation randomly when swiping right (like)
-    if (direction === 'right' && Math.random() > 0.5) {
-      setShowMatch(currentProfiles[0]);
-    }
+  useEffect(() => {
+    // Fetch profiles from the backend
+    const fetchProfiles = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase.functions.invoke('get-cards');
+        
+        if (error) {
+          console.error("Error fetching profiles:", error);
+          toast.error("Failed to load profiles");
+          return;
+        }
+        
+        if (data && Array.isArray(data)) {
+          setProfiles(data);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error("Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfiles();
+  }, []);
+
+  const handleSwipe = async (direction: 'left' | 'right') => {
+    if (profiles.length === 0) return;
     
-    // Remove the top card after swiping
-    setCurrentProfiles(prev => prev.slice(1));
+    const currentProfile = profiles[0];
+    const newProfiles = [...profiles.slice(1)];
+    setProfiles(newProfiles);
+
+    // Record the swipe in the backend
+    try {
+      const { data, error } = await supabase.functions.invoke('record-swipe', {
+        body: {
+          userId: currentUserID,
+          cardId: currentProfile.id,
+          direction
+        }
+      });
+
+      if (error) {
+        console.error("Error recording swipe:", error);
+        return;
+      }
+
+      // If it's a match, show the match animation
+      if (data?.match) {
+        setMatchedProfile(currentProfile);
+        setShowMatch(true);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="flex flex-col min-h-screen bg-background">
       <HeaderBar />
-      
-      <main className="flex-1 flex items-center justify-center px-4 pt-16 pb-20">
-        <div 
-          ref={containerRef}
-          className="relative w-full max-w-md h-[70vh] rounded-2xl overflow-hidden"
-        >
-          {currentProfiles.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center px-6 animate-fade-in">
-              <div className="text-2xl font-bold mb-4">No more profiles</div>
-              <p className="text-muted-foreground">
-                Check back soon or adjust your discovery settings to see more people.
-              </p>
-            </div>
-          ) : (
-            currentProfiles.slice(0, 3).map((profile, index) => (
-              <div 
-                key={profile.id} 
-                className="absolute inset-0"
-                style={{ 
-                  zIndex: currentProfiles.length - index,
-                  transform: `scale(${1 - index * 0.05}) translateY(${index * 10}px)`,
-                  opacity: 1 - index * 0.2
-                }}
-              >
-                <TinderCard 
-                  profile={profile} 
-                  onSwipe={handleSwipe} 
-                  isTop={index === 0} 
-                />
+
+      <main className="flex-1 flex items-center justify-center p-4 mt-16 mb-20">
+        {loading ? (
+          <div className="animate-pulse flex flex-col items-center">
+            <div className="h-96 w-72 bg-muted rounded-xl"></div>
+            <div className="mt-4 h-4 w-48 bg-muted rounded"></div>
+          </div>
+        ) : (
+          <div className="w-full max-w-md h-[32rem] relative">
+            {profiles.length > 0 ? (
+              profiles.map((profile, index) => (
+                <div 
+                  key={profile.id} 
+                  className="absolute top-0 left-0 right-0 bottom-0"
+                  style={{ zIndex: profiles.length - index }}
+                >
+                  <TinderCard
+                    profile={profile}
+                    onSwipe={handleSwipe}
+                    isTop={index === 0}
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-center p-6 border border-border rounded-xl">
+                <h3 className="text-xl font-semibold mb-2">No more profiles</h3>
+                <p className="text-muted-foreground">Check back later for more matches or adjust your settings.</p>
               </div>
-            ))
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </main>
-      
+
       <NavBar />
-      
-      {showMatch && (
+
+      {showMatch && matchedProfile && (
         <MatchAnimation 
-          profile={showMatch} 
-          onClose={() => setShowMatch(null)} 
+          profile={matchedProfile} 
+          onClose={() => setShowMatch(false)} 
         />
       )}
     </div>
