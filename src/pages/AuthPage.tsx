@@ -6,102 +6,77 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import HeaderBar from '@/components/HeaderBar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const AuthPage = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  // Check if user is already logged in
-  const checkSession = async () => {
-    const { data } = await supabase.auth.getSession();
-    if (data.session) {
-      navigate('/');
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      toast.success('Sign up successful! Please check your email.');
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  useState(() => {
-    checkSession();
-  }, []);
-
-  const handleAuth = async (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (isSignUp && password !== confirmPassword) {
-      toast.error("Passwords don't match");
-      return;
-    }
-    
-    setIsLoading(true);
+    setLoading(true);
     
     try {
-      let authResponse;
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       
-      if (isSignUp) {
-        // Sign up
-        authResponse = await supabase.auth.signUp({
-          email,
-          password,
-        });
-      } else {
-        // Sign in
-        authResponse = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-      }
-      
-      if (authResponse.error) {
-        throw authResponse.error;
-      }
-      
-      if (isSignUp) {
-        toast.success("Account created successfully! You can now log in.");
-        setIsSignUp(false);
-      } else {
-        toast.success("Logged in successfully!");
-        navigate('/');
-      }
+      if (error) throw error;
+      navigate('/');
     } catch (error: any) {
-      console.error("Authentication error:", error);
-      toast.error(error.message || "Authentication failed");
+      toast.error(error.message);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <HeaderBar />
-      
-      <main className="flex-1 flex items-center justify-center p-4 mt-16 mb-20">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold tracking-tight">
-              {isSignUp ? 'Create an account' : 'Welcome back'}
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              {isSignUp 
-                ? 'Enter your details to create an account' 
-                : 'Enter your credentials to access your account'}
-            </p>
-          </div>
+    <div className="flex min-h-screen flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-6">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold">Welcome to SwipeMatch</h1>
+          <p className="text-muted-foreground mt-2">Sign in or create an account to continue</p>
+        </div>
+        
+        <Tabs defaultValue="signin" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="signin">Sign In</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          </TabsList>
           
-          <div className="space-y-6 bg-card p-6 rounded-lg border border-border">
-            <form onSubmit={handleAuth} className="space-y-4">
+          <TabsContent value="signin">
+            <form onSubmit={handleSignIn} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input 
                   id="email" 
                   type="email" 
+                  placeholder="your@email.com" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com" 
-                  required 
+                  required
                 />
               </div>
               
@@ -109,57 +84,53 @@ const AuthPage = () => {
                 <Label htmlFor="password">Password</Label>
                 <Input 
                   id="password" 
-                  type="password"
+                  type="password" 
+                  placeholder="••••••••" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••" 
-                  required 
+                  required
                 />
               </div>
               
-              {isSignUp && (
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
-                  <Input 
-                    id="confirmPassword" 
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="••••••••" 
-                    required 
-                  />
-                </div>
-              )}
-              
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={isLoading}
-              >
-                {isLoading 
-                  ? 'Processing...' 
-                  : isSignUp ? 'Create account' : 'Sign in'}
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Signing in..." : "Sign In"}
               </Button>
             </form>
-            
-            <div className="text-center pt-4 border-t border-border">
-              <p className="text-sm text-muted-foreground">
-                {isSignUp 
-                  ? 'Already have an account?' 
-                  : "Don't have an account?"}
-                {' '}
-                <button
-                  type="button"
-                  onClick={() => setIsSignUp(!isSignUp)}
-                  className="text-primary hover:underline font-medium"
-                >
-                  {isSignUp ? 'Sign in' : 'Create one'}
-                </button>
-              </p>
-            </div>
-          </div>
-        </div>
-      </main>
+          </TabsContent>
+          
+          <TabsContent value="signup">
+            <form onSubmit={handleSignUp} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="signup-email">Email</Label>
+                <Input 
+                  id="signup-email" 
+                  type="email" 
+                  placeholder="your@email.com" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="signup-password">Password</Label>
+                <Input 
+                  id="signup-password" 
+                  type="password" 
+                  placeholder="••••••••" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Creating Account..." : "Create Account"}
+              </Button>
+            </form>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 };

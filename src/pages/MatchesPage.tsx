@@ -1,24 +1,15 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import HeaderBar from '@/components/HeaderBar';
 import NavBar from '@/components/NavBar';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, profiles } from '@/data/profiles';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle,
-  DialogFooter,
-  DialogDescription
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import ConnectionList from '@/components/matches/ConnectionList';
+import ProfileDialog from '@/components/matches/ProfileDialog';
 import ConnectionChat from '@/components/ConnectionChat';
 
 const MatchesPage = () => {
-  const navigate = useNavigate();
   const [connections, setConnections] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserID, setCurrentUserID] = useState("temp-user-id"); // Will be replaced with auth user ID later
@@ -110,85 +101,22 @@ const MatchesPage = () => {
           </button>
         </div>
         
-        {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="animate-pulse flex flex-col">
-                <div className="h-32 w-full bg-muted rounded-xl"></div>
-                <div className="mt-2 h-4 w-20 bg-muted rounded"></div>
-              </div>
-            ))}
-          </div>
-        ) : connections.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {connections.map((connection) => (
-              <div 
-                key={connection.id} 
-                className="flex flex-col border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => handleProfileClick(connection.id)}
-              >
-                <div 
-                  className="h-40 bg-cover bg-center hover:opacity-90 transition-opacity" 
-                  style={{ backgroundImage: `url(${connection.images[0]})` }}
-                ></div>
-                <div className="p-3">
-                  <h3 className="font-medium">{connection.name}, {connection.age}</h3>
-                  <p className="text-sm text-muted-foreground truncate">{connection.bio}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <h3 className="text-xl font-semibold mb-2">No connections yet</h3>
-            <p className="text-muted-foreground">Keep swiping to find your connections!</p>
-          </div>
-        )}
+        <ConnectionList 
+          connections={connections}
+          loading={loading}
+          onProfileClick={handleProfileClick}
+        />
       </main>
 
       <NavBar />
 
       {/* Profile Dialog */}
-      {selectedProfile && (
-        <Dialog open={!!selectedProfile} onOpenChange={(open) => !open && setSelectedProfile(null)}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>{selectedProfile.name}, {selectedProfile.age}</DialogTitle>
-              <DialogDescription className="text-sm text-muted-foreground">
-                {selectedProfile.distance} miles away
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="grid gap-4 py-4">
-              <div 
-                className="h-60 bg-cover bg-center rounded-md" 
-                style={{ backgroundImage: `url(${selectedProfile.images[0]})` }}
-              ></div>
-              
-              <p>{selectedProfile.bio}</p>
-              
-              {selectedProfile.tags && selectedProfile.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {selectedProfile.tags.map((tag, index) => (
-                    <span key={index} className="px-2 py-1 bg-muted text-xs rounded-full">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            <DialogFooter className="sm:justify-start">
-              <Button 
-                onClick={handleOpenChat}
-                className="w-full sm:w-auto"
-              >
-                Open Chat
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+      <ProfileDialog 
+        profile={selectedProfile}
+        open={!!selectedProfile}
+        onOpenChange={(open) => !open && setSelectedProfile(null)}
+        onOpenChat={handleOpenChat}
+      />
 
       {/* Chat Dialog */}
       <ConnectionChat 
