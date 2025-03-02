@@ -17,7 +17,7 @@ const MessageList = ({ messages, loading }: MessageListProps) => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages]);
+  }, [messages.length]);
 
   // Initial scroll to bottom when component mounts
   useEffect(() => {

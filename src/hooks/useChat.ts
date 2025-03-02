@@ -128,7 +128,7 @@ export const useChat = (
       };
 
       // Update local state immediately for better UX
-      setMessages(prev => [...prev, newMessage]);
+      setMessages(prevMessages => [...prevMessages, newMessage]);
       const sentMessageText = messageText.trim();
       setMessageText(''); // Clear input immediately for better UX
       
