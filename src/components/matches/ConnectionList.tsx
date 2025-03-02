@@ -68,7 +68,7 @@ const ConnectionList = ({ connections, loading, onProfileClick }: ConnectionList
               <div className="flex items-center gap-1">
                 <h3 className="font-medium">{connection.name}, {connection.age}</h3>
                 {hasNewMessage && (
-                  <MessageCircle size={14} className="text-green-500" />
+                  <MessageCircle size={14} className="text-green-500 fill-green-500" />
                 )}
               </div>
               <p className="text-sm text-muted-foreground truncate">{connection.bio || "No bio available"}</p>
