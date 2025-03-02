@@ -46,15 +46,41 @@ export const fetchConnectionsFromSupabase = async (userId: string): Promise<Exte
 
 // Get test connections for development
 export const getTestConnections = (unreadMessages: Record<string, boolean>): ExtendedProfile[] => {
-  // Use 3 random profiles from the local data as connections
-  const testConnections = [...profiles]
+  // Ana's profile
+  const anaProfile: ExtendedProfile = {
+    id: "ana-1",
+    name: "Ana",
+    age: 28,
+    bio: "Travel enthusiast and coffee addict. Always looking for new adventures!",
+    images: ["/lovable-uploads/045f4838-7fe0-4265-943a-0d7ba5dec7de.png"],
+    tags: ["Travel", "Coffee", "Photography"],
+    hasNewMessage: true
+  };
+  
+  // Michael Jui's profile
+  const michaelProfile: ExtendedProfile = {
+    id: "michael-1",
+    name: "Michael Jui",
+    age: 32,
+    bio: "Software engineer by day, chef by night. Love hiking and exploring nature.",
+    images: ["/lovable-uploads/290973f2-f16b-4e56-8cfe-afb3b85e2239.png"],
+    tags: ["Coding", "Cooking", "Hiking"]
+  };
+  
+  // Use one random profile from the local data and add our two custom ones
+  const randomProfile = [...profiles]
     .sort(() => 0.5 - Math.random())
-    .slice(0, 3)
+    .slice(0, 1)
     .map(profile => ({
       ...profile,
-      // For testing, mark one profile randomly as having a new message
-      hasNewMessage: profile.id === profiles[0].id ? true : unreadMessages[profile.id] || false
-    }));
+      hasNewMessage: unreadMessages[profile.id] || false
+    }))[0];
+  
+  const testConnections = [
+    anaProfile,
+    michaelProfile,
+    randomProfile
+  ];
   
   console.log("Test connections with message indicators:", testConnections);
   return testConnections;
@@ -63,6 +89,8 @@ export const getTestConnections = (unreadMessages: Record<string, boolean>): Ext
 // Delete a connection from Supabase
 export const deleteConnectionFromSupabase = async (userId: string, connectionId: string): Promise<boolean> => {
   try {
+    console.log(`Attempting to delete connection: User ID ${userId}, Connection ID ${connectionId}`);
+    
     const { data, error } = await supabase.functions.invoke('delete-connection', {
       body: { 
         userId,
@@ -75,6 +103,7 @@ export const deleteConnectionFromSupabase = async (userId: string, connectionId:
       return false;
     }
     
+    console.log("Delete connection response:", data);
     return true;
   } catch (err) {
     console.error("Failed to delete connection:", err);
@@ -84,5 +113,8 @@ export const deleteConnectionFromSupabase = async (userId: string, connectionId:
 
 // Delete a test connection
 export const deleteTestConnection = (connections: ExtendedProfile[], connectionId: string): ExtendedProfile[] => {
-  return connections.filter(connection => connection.id !== connectionId);
+  console.log(`Removing connection with ID ${connectionId} from list of ${connections.length} connections`);
+  const filteredConnections = connections.filter(connection => connection.id !== connectionId);
+  console.log(`Remaining connections: ${filteredConnections.length}`);
+  return filteredConnections;
 };

@@ -1,5 +1,5 @@
 
-import React, { useContext } from 'react';
+import React from 'react';
 import HeaderBar from '@/components/HeaderBar';
 import NavBar from '@/components/NavBar';
 import ConnectionList from '@/components/matches/ConnectionList';
@@ -8,7 +8,6 @@ import ConnectionChat from '@/components/ConnectionChat';
 import { useConnectionsData } from '@/components/matches/useConnectionsData';
 import { useDialogsState } from '@/components/matches/useDialogsState';
 import ConnectionsHeader from '@/components/matches/ConnectionsHeader';
-import { useNotificationBadges } from '@/hooks/useNotificationBadges';
 
 const MatchesPage = () => {
   const { 
@@ -31,8 +30,6 @@ const MatchesPage = () => {
     handleMessageSent
   } = useDialogsState();
 
-  const { clearBadge } = useNotificationBadges();
-
   // Function to handle profile clicks that also clears message flags
   const handleProfileSelection = (profileId: string) => {
     // Clear the new message notification for this profile
@@ -40,6 +37,19 @@ const MatchesPage = () => {
     
     // Handle the profile click (open dialog)
     handleProfileClick(profileId, connections);
+  };
+
+  // Function to handle connection deletion
+  const handleDeleteConnection = async (connectionId: string) => {
+    console.log("Deleting connection:", connectionId);
+    
+    // Close profile dialog if the deleted connection is currently selected
+    if (selectedProfile && selectedProfile.id === connectionId) {
+      setSelectedProfile(null);
+    }
+    
+    // Delete the connection
+    await deleteConnection(connectionId);
   };
 
   return (
@@ -56,7 +66,7 @@ const MatchesPage = () => {
           connections={connections}
           loading={loading}
           onProfileClick={handleProfileSelection}
-          onDeleteConnection={deleteConnection}
+          onDeleteConnection={handleDeleteConnection}
         />
       </main>
 

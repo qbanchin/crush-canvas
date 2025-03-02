@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
-import { getCurrentUser, fetchConnectionsFromSupabase, getTestConnections, deleteConnectionFromSupabase } from './utils/connectionUtils';
+import { getCurrentUser, fetchConnectionsFromSupabase, getTestConnections, deleteConnectionFromSupabase, deleteTestConnection } from './utils/connectionUtils';
 import { useMessageSubscription } from './hooks/useMessageSubscription';
 import { ExtendedProfile, ConnectionsState, ConnectionsDataReturn } from './types/connectionTypes';
 
@@ -134,19 +134,26 @@ export function useConnectionsData(): ConnectionsDataReturn {
   const deleteConnection = useCallback(async (connectionId: string) => {
     try {
       setState(prev => ({ ...prev, loading: true }));
-
+      console.log(`Deleting connection with ID: ${connectionId}`);
+      
       let success = false;
       
       if (!useTestData && currentUserID) {
         // Delete from Supabase
         success = await deleteConnectionFromSupabase(currentUserID, connectionId);
+        console.log(`Supabase delete result: ${success ? 'Success' : 'Failed'}`);
       } else {
         // For test data, we'll just filter out the connection locally
+        const updatedConnections = deleteTestConnection(connections, connectionId);
+        
         setState(prev => ({
           ...prev,
-          connections: prev.connections.filter(conn => conn.id !== connectionId)
+          connections: updatedConnections,
+          loading: false
         }));
+        
         success = true;
+        console.log(`Test data delete completed. Connections remaining: ${updatedConnections.length}`);
       }
       
       if (success) {
@@ -171,7 +178,7 @@ export function useConnectionsData(): ConnectionsDataReturn {
       setState(prev => ({ ...prev, loading: false }));
       toast.error("Something went wrong");
     }
-  }, [currentUserID, useTestData]);
+  }, [currentUserID, useTestData, connections]);
 
   const toggleTestData = useCallback(() => {
     setState(prev => ({

@@ -40,17 +40,18 @@ serve(async (req: Request) => {
 
     // For now, since we're using test data in the app, we'll return a success response
     // In a real application with proper database setup, we would delete the actual record
+    // from the matches table where user_id = userId AND liked_user_id = connectionId
     
     console.log('Connection deleted successfully')
     
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({ success: true, message: 'Connection deleted successfully' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     )
   } catch (error) {
     console.error('Unexpected error:', error)
     return new Response(
-      JSON.stringify({ error: 'Internal Server Error' }),
+      JSON.stringify({ error: 'Internal Server Error', details: error.message }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     )
   }

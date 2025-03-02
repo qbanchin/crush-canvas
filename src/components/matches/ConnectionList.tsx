@@ -1,11 +1,11 @@
 
-import { Profile } from '@/data/profiles';
+import { ExtendedProfile } from './types/connectionTypes';
 import { ImageIcon, MessageCircle, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
 interface ConnectionListProps {
-  connections: Profile[];
+  connections: ExtendedProfile[];
   loading: boolean;
   onProfileClick: (profileId: string) => void;
   onDeleteConnection?: (profileId: string) => void;
@@ -41,6 +41,14 @@ const ConnectionList = ({
       </div>
     );
   }
+
+  const handleDeleteClick = (e: React.MouseEvent, connectionId: string, name: string) => {
+    e.stopPropagation();
+    if (onDeleteConnection && window.confirm(`Remove ${name} from your connections?`)) {
+      console.log(`Confirming deletion of connection: ${connectionId}`);
+      onDeleteConnection(connectionId);
+    }
+  };
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -93,12 +101,7 @@ const ConnectionList = ({
                     variant="ghost" 
                     size="icon" 
                     className="h-7 w-7" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (confirm(`Remove ${connection.name} from your connections?`)) {
-                        onDeleteConnection(connection.id);
-                      }
-                    }}
+                    onClick={(e) => handleDeleteClick(e, connection.id, connection.name)}
                     aria-label="Delete connection"
                   >
                     <XCircle className="h-4 w-4 text-muted-foreground hover:text-destructive" />
