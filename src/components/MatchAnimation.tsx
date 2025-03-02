@@ -49,7 +49,7 @@ const MatchAnimation: React.FC<MatchAnimationProps> = ({ profile, onClose }) => 
               stage === 'initial' && 'scale-0',
               stage !== 'initial' && 'scale-100'
             )}>
-              It's a Match!
+              You Connected!
             </div>
           </div>
           
