@@ -4,9 +4,32 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { useProfileContext } from '@/contexts/ProfileContext';
 
-const ProfileContentHandlers: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface PhotoHandlerProps {
+  onPhotosAdded?: (newPhotos: string[]) => void;
+  onPhotosReordered?: (reorderedPhotos: string[]) => void;
+  onPhotoDeleted?: (index: number) => void;
+}
+
+const ProfileContentHandlers: React.FC<{ 
+  children: React.ReactNode;
+  onPhotosAdded?: (newPhotos: string[]) => void;
+  onPhotosReordered?: (reorderedPhotos: string[]) => void;
+  onPhotoDeleted?: (index: number) => void;
+}> = ({ 
+  children,
+  onPhotosAdded,
+  onPhotosReordered,
+  onPhotoDeleted
+}) => {
   const { toast } = useToast();
   const { user, setUser, setIsEditProfileOpen, setEditForm } = useProfileContext();
+
+  // Log to verify handlers are received at this level
+  console.log("ProfileContentHandlers - Handlers received:", {
+    onPhotosAdded: !!onPhotosAdded,
+    onPhotosReordered: !!onPhotosReordered,
+    onPhotoDeleted: !!onPhotoDeleted
+  });
 
   const handleBioSave = async (newBio: string) => {
     try {
@@ -94,7 +117,10 @@ const ProfileContentHandlers: React.FC<{ children: React.ReactNode }> = ({ child
           return React.cloneElement(child, {
             onBioSave: handleBioSave,
             onInterestsSave: handleInterestsSave,
-            onEditProfile: handleEditProfile
+            onEditProfile: handleEditProfile,
+            onPhotosAdded: onPhotosAdded,
+            onPhotosReordered: onPhotosReordered,
+            onPhotoDeleted: onPhotoDeleted
           } as any);
         }
         return child;

@@ -26,7 +26,11 @@ const PhotoManagement: React.FC<PhotoManagementProps> = ({
 
   const { state, handlers } = usePhotoManagement(
     userImages,
-    { onPhotosAdded, onPhotosReordered, onPhotoDeleted }
+    { 
+      onPhotosAdded, 
+      onPhotosReordered, 
+      onPhotoDeleted 
+    }
   );
 
   return (
