@@ -14,14 +14,6 @@ serve(async (req) => {
   }
 
   try {
-    // Get the request body
-    const { userId, cardId, direction } = await req.json();
-    
-    // Validate the request
-    if (!userId || !cardId || !direction) {
-      throw new Error("Missing required fields");
-    }
-
     // Create a Supabase client with the Auth context of the logged in user
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -33,81 +25,92 @@ serve(async (req) => {
       }
     );
 
-    // Only record likes (right swipes)
-    if (direction === "right") {
-      // Record the swipe
-      const { error: insertError } = await supabaseClient
-        .from("matches")
-        .insert({
-          user_id: userId,
-          liked_user_id: cardId,
-          is_match: false
-        });
+    // Get the current user's ID
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
 
-      if (insertError) throw insertError;
+    // Get request body
+    const { cardId, direction } = await req.json();
+    
+    console.log(`Recording swipe: User ${user.id} swiped ${direction} on card ${cardId}`);
+    
+    // Check if this is a right swipe (like)
+    const isMatch = direction === "right";
+    
+    // Check if there's already a record to avoid duplicates
+    const { data: existingRecord, error: checkError } = await supabaseClient
+      .from("matches")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("liked_user_id", cardId)
+      .single();
+      
+    if (checkError && checkError.code !== "PGRST116") {
+      // If error is not "no rows returned", then it's a real error
+      console.error("Error checking existing record:", checkError);
+      throw checkError;
+    }
+    
+    // If record already exists, don't insert again
+    if (existingRecord) {
+      console.log("Record already exists, not inserting again");
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          match: false, 
+          message: "Record already exists"
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    // Insert the new match/reject record
+    const { error: insertError } = await supabaseClient
+      .from("matches")
+      .insert({
+        user_id: user.id,
+        liked_user_id: cardId,
+        is_match: isMatch
+      });
 
-      // Check if there's a match
-      const { data: matchData, error: matchError } = await supabaseClient
+    if (insertError) {
+      console.error("Error inserting match record:", insertError);
+      throw insertError;
+    }
+
+    // If it was a right swipe, check if there's a mutual match
+    let match = false;
+    if (isMatch) {
+      const { data: mutualMatch, error: mutualError } = await supabaseClient
         .from("matches")
         .select("*")
         .eq("user_id", cardId)
-        .eq("liked_user_id", userId)
+        .eq("liked_user_id", user.id)
+        .eq("is_match", true)
         .single();
 
-      if (matchError && matchError.code !== "PGRST116") {
-        throw matchError;
-      }
-
-      // If there's a match, update both records
-      if (matchData) {
-        // Update the original match
-        const { error: updateError1 } = await supabaseClient
-          .from("matches")
-          .update({ is_match: true })
-          .eq("user_id", userId)
-          .eq("liked_user_id", cardId);
-
-        if (updateError1) throw updateError1;
-
-        // Update the reciprocal match
-        const { error: updateError2 } = await supabaseClient
-          .from("matches")
-          .update({ is_match: true })
-          .eq("user_id", cardId)
-          .eq("liked_user_id", userId);
-
-        if (updateError2) throw updateError2;
-
-        // Return with match data
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            match: true 
-          }),
-          {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 200,
-          }
-        );
+      if (mutualError && mutualError.code !== "PGRST116") {
+        console.error("Error checking mutual match:", mutualError);
+      } else if (mutualMatch) {
+        match = true;
+        console.log("Mutual match found!");
       }
     }
 
-    // Return success
     return new Response(
-      JSON.stringify({ 
-        success: true,
-        match: false 
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      }
+      JSON.stringify({ success: true, match }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error(error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 400,
-    });
+    console.error("Error in record-swipe function:", error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { 
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400 
+      }
+    );
   }
 });

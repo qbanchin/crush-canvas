@@ -25,6 +25,12 @@ serve(async (req) => {
       }
     )
 
+    // Get current user for authorization
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) {
+      throw new Error('Not authenticated');
+    }
+
     // Parse the request body
     let excludeIds: string[] = [];
     let genderPreference: string | null = null;
@@ -44,12 +50,15 @@ serve(async (req) => {
       .from('cards')
       .select('*');
     
+    // ALWAYS exclude the current user
+    query = query.neq('id', user.id);
+    
     // If there are profile IDs to exclude, add that to the query
     if (excludeIds.length > 0) {
       query = query.not('id', 'in', `(${excludeIds.join(',')})`);
     }
     
-    // Apply gender preference filtering if both preference and gender fields are provided
+    // Apply gender preference filtering if provided
     if (genderPreference === 'male') {
       query = query.eq('gender', 'male');
     } else if (genderPreference === 'female') {

@@ -34,6 +34,8 @@ const Index = () => {
         
         if (!userId) {
           console.error("User not authenticated");
+          toast.error("Authentication required");
+          setLoading(false);
           return;
         }
 
@@ -42,7 +44,7 @@ const Index = () => {
           .from('cards')
           .select('gender, preference')
           .eq('id', userId)
-          .single();
+          .maybeSingle();
         
         if (userProfileError) {
           console.error("Error fetching user profile:", userProfileError);
@@ -55,11 +57,12 @@ const Index = () => {
         
         console.log("User gender:", userGender, "Preference:", genderPreference);
 
-        // First, fetch all existing connections and rejected profiles
+        // Fetch all existing connections and rejected profiles
         const { data: connectionsData, error: connectionsError } = await supabase.functions.invoke('get-matches');
         
         if (connectionsError) {
           console.error("Error fetching connections:", connectionsError);
+          toast.error("Failed to load match data");
         }
         
         // Extract connection IDs and rejected profile IDs
@@ -89,14 +92,16 @@ const Index = () => {
         if (error) {
           console.error("Error fetching profiles:", error);
           toast.error("Failed to load profiles");
+          setLoading(false);
           return;
         }
         
         if (data && Array.isArray(data)) {
-          // Filter out the current user's profile
-          const filteredProfiles = data.filter(profile => profile.id !== userId);
-          console.log(`Loaded ${filteredProfiles.length} profiles, excluded ${connectionIds.length} connections and ${rejectedIds.length} rejected profiles`);
-          setProfiles(filteredProfiles);
+          console.log(`Loaded ${data.length} profiles, excluded ${connectionIds.length} connections and ${rejectedIds.length} rejected profiles`);
+          setProfiles(data);
+        } else {
+          console.error("No profiles data returned or invalid format");
+          setProfiles([]);
         }
       } catch (error) {
         console.error("Error:", error);
