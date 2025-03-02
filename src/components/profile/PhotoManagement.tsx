@@ -18,6 +18,12 @@ const PhotoManagement: React.FC<PhotoManagementProps> = ({
   onPhotosReordered,
   onPhotoDeleted
 }) => {
+  console.log("PhotoManagement - Handlers defined:", {
+    onPhotosAdded: !!onPhotosAdded,
+    onPhotosReordered: !!onPhotosReordered,
+    onPhotoDeleted: !!onPhotoDeleted
+  });
+
   const { state, handlers } = usePhotoManagement(
     userImages,
     { onPhotosAdded, onPhotosReordered, onPhotoDeleted }

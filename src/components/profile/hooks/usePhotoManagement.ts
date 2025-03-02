@@ -10,11 +10,7 @@ import { handleDragStart, handleDragOver, handleDragEnd } from './utils/dragDrop
 
 export const usePhotoManagement = (
   userImages: string[],
-  handlers: {
-    onPhotosAdded?: (newPhotos: string[]) => void;
-    onPhotosReordered?: (reorderedPhotos: string[]) => void;
-    onPhotoDeleted?: (index: number) => void;
-  }
+  handlers: PhotoManagementHandlers
 ) => {
   const { toast } = useToast();
   const [state, setState] = useState<PhotoManagementState>({
@@ -23,7 +19,14 @@ export const usePhotoManagement = (
     editablePhotos: [...userImages],
     selectedFiles: [],
     previewUrls: [],
-    draggedIndex: -1
+    draggedIndex: null
+  });
+
+  // Log to debug handlers
+  console.log("usePhotoManagement - Handlers:", { 
+    onPhotosAdded: !!handlers.onPhotosAdded, 
+    onPhotosReordered: !!handlers.onPhotosReordered,
+    onPhotoDeleted: !!handlers.onPhotoDeleted
   });
 
   // Dialog handlers

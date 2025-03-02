@@ -8,7 +8,18 @@ export function handleSavePhotos(
   toast: any
 ) {
   const { activeTab, editablePhotos, previewUrls } = state;
-  const { onPhotosAdded, onPhotosReordered } = handlers;
+  const { onPhotosAdded, onPhotosReordered, onPhotoDeleted } = handlers;
+
+  console.log("handleSavePhotos - Active Tab:", activeTab);
+  console.log("handleSavePhotos - Handlers:", { 
+    onPhotosAdded: !!onPhotosAdded, 
+    onPhotosReordered: !!onPhotosReordered,
+    onPhotoDeleted: !!onPhotoDeleted
+  });
+  console.log("handleSavePhotos - Photos Data:", { 
+    editablePhotos: editablePhotos?.length, 
+    previewUrls: previewUrls?.length 
+  });
 
   if (activeTab === "add") {
     if (previewUrls.length === 0) {

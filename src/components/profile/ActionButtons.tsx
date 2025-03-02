@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Edit } from 'lucide-react';
 import PhotoManagement from './PhotoManagement';
 
 interface ActionButtonsProps {
@@ -12,28 +12,27 @@ interface ActionButtonsProps {
   onPhotoDeleted?: (index: number) => void;
 }
 
-const ActionButtons: React.FC<ActionButtonsProps> = ({
+const ActionButtons: React.FC<ActionButtonsProps> = ({ 
   onEditProfile,
   userImages,
   onPhotosAdded,
   onPhotosReordered,
   onPhotoDeleted
 }) => {
-  // Log the handlers to verify they're defined
-  console.log('ActionButtons - Handlers received:', {
-    hasAddHandler: !!onPhotosAdded,
-    hasReorderHandler: !!onPhotosReordered,
-    hasDeleteHandler: !!onPhotoDeleted
+  console.log("ActionButtons - Handlers defined:", {
+    onPhotosAdded: !!onPhotosAdded,
+    onPhotosReordered: !!onPhotosReordered,
+    onPhotoDeleted: !!onPhotoDeleted
   });
-
+  
   return (
-    <div className="flex gap-2 mb-6">
+    <div className="flex flex-row gap-4 my-4">
       <Button 
         variant="outline" 
-        className="flex-1 gap-2"
+        className="flex-1 gap-2" 
         onClick={onEditProfile}
       >
-        <Pencil size={16} />
+        <Edit size={16} />
         Edit Profile
       </Button>
       
