@@ -55,8 +55,15 @@ const AuthPage = () => {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold">Welcome to SwipeMatch</h1>
+        <div className="text-center space-y-4">
+          <img 
+            src="/lovable-uploads/045f4838-7fe0-4265-943a-0d7ba5dec7de.png" 
+            alt="Single Expats Logo" 
+            className="w-32 h-32 mx-auto"
+          />
+          <h1 className="text-3xl font-bold">
+            <span className="text-secondary">Single</span> <span className="text-primary">Expats</span>
+          </h1>
           <p className="text-muted-foreground mt-2">Sign in or create an account to continue</p>
         </div>
         
