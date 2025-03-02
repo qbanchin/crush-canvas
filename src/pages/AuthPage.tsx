@@ -24,16 +24,24 @@ const AuthPage = () => {
         throw new Error("Please enter your name");
       }
 
-      // Sign up the user
+      // Sign up the user with additional metadata to include the name
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: name, // Store name in user metadata
+          }
+        }
       });
       
       if (authError) throw authError;
 
       // If sign up was successful, create a profile for the user
       if (authData?.user) {
+        // Log the user ID for debugging
+        console.log("User created with ID:", authData.user.id);
+        
         // Create a profile in the cards table
         const { error: profileError } = await supabase
           .from('cards')
