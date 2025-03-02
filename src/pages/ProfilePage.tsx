@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import HeaderBar from '@/components/HeaderBar';
 import NavBar from '@/components/NavBar';
@@ -10,6 +9,16 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { 
+  Switch
+} from "@/components/ui/switch";
 
 const ProfilePage = () => {
   const { toast } = useToast();
@@ -24,6 +33,11 @@ const ProfilePage = () => {
     ],
     interests: ["Coffee", "Photography", "Hiking", "Music", "Travel"]
   });
+
+  // Settings state
+  const [showOnlineStatus, setShowOnlineStatus] = useState(true);
+  const [showActivity, setShowActivity] = useState(true);
+  const [distanceUnit, setDistanceUnit] = useState("km");
 
   // State for editing
   const [editingBio, setEditingBio] = useState(false);
@@ -75,6 +89,13 @@ const ProfilePage = () => {
     setTempInterests(tempInterests.filter(i => i !== interest));
   };
 
+  const handleSettingsUpdate = () => {
+    toast({
+      title: "Settings updated",
+      description: "Your settings have been successfully updated."
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <HeaderBar />
@@ -99,9 +120,72 @@ const ProfilePage = () => {
                 </div>
               </div>
               
-              <Button variant="outline" size="icon" className="absolute top-0 right-0">
-                <Settings size={18} />
-              </Button>
+              {/* Settings button with dialog */}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="icon" className="absolute top-0 right-0">
+                    <Settings size={18} />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Profile Settings</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <h4 className="font-medium">Show Online Status</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Let others see when you're active
+                        </p>
+                      </div>
+                      <Switch 
+                        checked={showOnlineStatus} 
+                        onCheckedChange={setShowOnlineStatus} 
+                      />
+                    </div>
+                    <Separator />
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <h4 className="font-medium">Show Activity Status</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Show your activity on your profile
+                        </p>
+                      </div>
+                      <Switch 
+                        checked={showActivity} 
+                        onCheckedChange={setShowActivity} 
+                      />
+                    </div>
+                    <Separator />
+                    <div className="space-y-2">
+                      <h4 className="font-medium">Distance Unit</h4>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant={distanceUnit === "km" ? "default" : "outline"} 
+                          onClick={() => setDistanceUnit("km")}
+                          size="sm"
+                        >
+                          Kilometers
+                        </Button>
+                        <Button 
+                          variant={distanceUnit === "mi" ? "default" : "outline"} 
+                          onClick={() => setDistanceUnit("mi")}
+                          size="sm"
+                        >
+                          Miles
+                        </Button>
+                      </div>
+                    </div>
+                    <Button 
+                      className="w-full mt-4" 
+                      onClick={handleSettingsUpdate}
+                    >
+                      Save Settings
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
             
             {/* Profile controls */}
