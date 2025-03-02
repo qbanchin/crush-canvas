@@ -6,8 +6,8 @@ import { ExtendedProfile } from '../types/connectionTypes';
 interface MessageSubscriptionProps {
   userId: string;
   connections: ExtendedProfile[];
-  setUnreadMessages: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
-  setConnections: React.Dispatch<React.SetStateAction<ExtendedProfile[]>>;
+  setUnreadMessages: (value: Record<string, boolean> | ((prev: Record<string, boolean>) => Record<string, boolean>)) => void;
+  setConnections: (value: ExtendedProfile[] | ((prev: ExtendedProfile[]) => ExtendedProfile[])) => void;
 }
 
 export function useMessageSubscription({
@@ -31,6 +31,7 @@ export function useMessageSubscription({
         (payload) => {
           if (payload.new && payload.new.recipient_id === userId) {
             console.log("New message detected from:", payload.new.sender_id);
+            
             // Mark this sender as having a new message
             setUnreadMessages(prev => ({
               ...prev,

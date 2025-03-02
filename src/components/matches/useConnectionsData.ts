@@ -1,11 +1,11 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { getCurrentUser, fetchConnectionsFromSupabase, getTestConnections } from './utils/connectionUtils';
 import { useMessageSubscription } from './hooks/useMessageSubscription';
-import { ExtendedProfile, ConnectionsState } from './types/connectionTypes';
+import { ExtendedProfile, ConnectionsState, ConnectionsDataReturn } from './types/connectionTypes';
 
-export function useConnectionsData() {
+export function useConnectionsData(): ConnectionsDataReturn {
   const [state, setState] = useState<ConnectionsState>({
     connections: [],
     loading: true,
@@ -70,18 +70,31 @@ export function useConnectionsData() {
     fetchData();
   }, [useTestData, unreadMessages]);
   
+  // Define callbacks for updating the state
+  const setUnreadMessages = useCallback((value: Record<string, boolean> | ((prev: Record<string, boolean>) => Record<string, boolean>)) => {
+    setState(prev => {
+      const newUnreadMessages = typeof value === 'function' ? value(prev.unreadMessages) : value;
+      return { ...prev, unreadMessages: newUnreadMessages };
+    });
+  }, []);
+
+  const setConnections = useCallback((value: ExtendedProfile[] | ((prev: ExtendedProfile[]) => ExtendedProfile[])) => {
+    setState(prev => {
+      const newConnections = typeof value === 'function' ? value(prev.connections) : value;
+      return { ...prev, connections: newConnections };
+    });
+  }, []);
+  
   // Set up subscription for new messages
   useMessageSubscription({
     userId: currentUserID || '',
     connections,
-    setUnreadMessages: (newUnreadMessages) => 
-      setState(prev => ({ ...prev, unreadMessages: newUnreadMessages })),
-    setConnections: (newConnections) => 
-      setState(prev => ({ ...prev, connections: newConnections }))
+    setUnreadMessages,
+    setConnections
   });
 
   // Add a function to clear the hasNewMessage flag for a specific connection
-  const clearNewMessageFlag = (connectionId: string) => {
+  const clearNewMessageFlag = useCallback((connectionId: string) => {
     setState(prev => ({
       ...prev,
       unreadMessages: {
@@ -94,15 +107,15 @@ export function useConnectionsData() {
           : conn
       )
     }));
-  };
+  }, []);
 
-  const toggleTestData = () => {
+  const toggleTestData = useCallback(() => {
     setState(prev => ({
       ...prev,
       useTestData: !prev.useTestData,
       loading: true
     }));
-  };
+  }, []);
 
   return {
     connections,
