@@ -69,6 +69,42 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_settings: {
+        Row: {
+          app_updates: boolean
+          created_at: string | null
+          email_notifications: boolean
+          id: string
+          messages: boolean
+          new_matches: boolean
+          push_notifications: boolean
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          app_updates?: boolean
+          created_at?: string | null
+          email_notifications?: boolean
+          id?: string
+          messages?: boolean
+          new_matches?: boolean
+          push_notifications?: boolean
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          app_updates?: boolean
+          created_at?: string | null
+          email_notifications?: boolean
+          id?: string
+          messages?: boolean
+          new_matches?: boolean
+          push_notifications?: boolean
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

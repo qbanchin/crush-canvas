@@ -47,14 +47,14 @@ const NotificationsSettingsPage: React.FC = () => {
         return;
       }
 
+      // Use the database column names which use snake_case
       const { data, error } = await supabase
         .from('notification_settings')
-        .select('*')
+        .select('new_matches, messages, app_updates, email_notifications, push_notifications')
         .eq('user_id', session.user.id)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
-        // PGRST116 means no rows returned, which is expected for new users
+      if (error) {
         console.error('Error fetching notification settings:', error);
         toast({
           title: "Error",
@@ -64,9 +64,14 @@ const NotificationsSettingsPage: React.FC = () => {
       }
 
       if (data) {
-        // Remove user_id from the data before setting state
-        const { user_id, id, created_at, ...settingsData } = data;
-        setSettings(settingsData as NotificationSettings);
+        // Map from snake_case database columns to camelCase React state
+        setSettings({
+          newMatches: data.new_matches,
+          messages: data.messages,
+          appUpdates: data.app_updates,
+          emailNotifications: data.email_notifications,
+          pushNotifications: data.push_notifications
+        });
       }
     } catch (error) {
       console.error('Error fetching notification settings:', error);
@@ -97,12 +102,22 @@ const NotificationsSettingsPage: React.FC = () => {
         return;
       }
 
+      // Map from camelCase React state to snake_case database columns
+      const dbSettings = {
+        new_matches: settings.newMatches,
+        messages: settings.messages,
+        app_updates: settings.appUpdates,
+        email_notifications: settings.emailNotifications,
+        push_notifications: settings.pushNotifications,
+        user_id: session.user.id
+      };
+
       // First, check if the user already has settings
       const { data: existingSettings } = await supabase
         .from('notification_settings')
         .select('id')
         .eq('user_id', session.user.id)
-        .single();
+        .maybeSingle();
 
       let result;
       
@@ -110,16 +125,19 @@ const NotificationsSettingsPage: React.FC = () => {
         // Update existing settings
         result = await supabase
           .from('notification_settings')
-          .update(settings)
+          .update({
+            new_matches: settings.newMatches,
+            messages: settings.messages,
+            app_updates: settings.appUpdates,
+            email_notifications: settings.emailNotifications,
+            push_notifications: settings.pushNotifications
+          })
           .eq('user_id', session.user.id);
       } else {
         // Insert new settings
         result = await supabase
           .from('notification_settings')
-          .insert({
-            user_id: session.user.id,
-            ...settings
-          });
+          .insert(dbSettings);
       }
 
       if (result.error) {
