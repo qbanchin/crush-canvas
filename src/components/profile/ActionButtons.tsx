@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Edit, Camera } from 'lucide-react';
+import { Edit, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PhotoManagement from './PhotoManagement';
 
@@ -8,12 +8,16 @@ interface ActionButtonsProps {
   onEditProfile: () => void;
   userImages: string[];
   onPhotosAdded: (newPhotos: string[]) => void;
+  onPhotosReordered?: (reorderedPhotos: string[]) => void;
+  onPhotoDeleted?: (index: number) => void;
 }
 
 const ActionButtons: React.FC<ActionButtonsProps> = ({ 
   onEditProfile, 
   userImages, 
-  onPhotosAdded
+  onPhotosAdded,
+  onPhotosReordered,
+  onPhotoDeleted
 }) => {
   return (
     <div className="flex gap-3 mb-8">
@@ -24,6 +28,8 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
       <PhotoManagement 
         userImages={userImages}
         onPhotosAdded={onPhotosAdded}
+        onPhotosReordered={onPhotosReordered}
+        onPhotoDeleted={onPhotoDeleted}
       />
     </div>
   );

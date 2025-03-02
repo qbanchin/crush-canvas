@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import HeaderBar from '@/components/HeaderBar';
 import NavBar from '@/components/NavBar';
@@ -62,6 +61,20 @@ const ProfilePage = () => {
     });
   };
 
+  const handlePhotosReordered = (reorderedPhotos: string[]) => {
+    setUser({
+      ...user,
+      images: reorderedPhotos
+    });
+    
+    setCurrentImageIndex(0);
+    
+    toast({
+      title: "Photos reordered",
+      description: "Your profile photos have been reordered successfully."
+    });
+  };
+
   const handleDeleteImage = (index: number) => {
     if (user.images.length <= 1) {
       toast({
@@ -80,7 +93,6 @@ const ProfilePage = () => {
       images: newImages
     });
     
-    // Adjust current index if necessary
     if (index >= newImages.length) {
       setCurrentImageIndex(newImages.length - 1);
     }
@@ -109,7 +121,6 @@ const ProfilePage = () => {
   };
 
   const handleSaveProfile = () => {
-    // Validate form data
     if (!editForm.name.trim()) {
       toast({
         title: "Invalid name",
@@ -137,7 +148,6 @@ const ProfilePage = () => {
       return;
     }
 
-    // Update user data
     setUser({
       ...user,
       name: editForm.name,
@@ -145,10 +155,8 @@ const ProfilePage = () => {
       location: editForm.location
     });
 
-    // Close the dialog
     setIsEditProfileOpen(false);
 
-    // Show success toast
     toast({
       title: "Profile updated",
       description: "Your profile has been successfully updated."
@@ -180,6 +188,8 @@ const ProfilePage = () => {
               onEditProfile={handleEditProfile}
               userImages={user.images}
               onPhotosAdded={handlePhotosAdded}
+              onPhotosReordered={handlePhotosReordered}
+              onPhotoDeleted={handleDeleteImage}
             />
             
             <BioEditor 
