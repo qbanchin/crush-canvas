@@ -47,10 +47,10 @@ serve(async (req) => {
     
     console.log(`Sending message: ${messageId} from ${userId} to ${recipientId}`);
     
-    // Create messages table if it doesn't exist (will only run once)
-    const { error: tableError } = await supabase.rpc('create_messages_table_if_not_exists');
-    if (tableError) {
-      console.error("Error checking/creating messages table:", tableError);
+    // Create messages table if it doesn't exist (using the stored procedure)
+    const { error: procError } = await supabase.rpc('create_messages_table_if_not_exists');
+    if (procError) {
+      console.error("Error checking/creating messages table:", procError);
       // Continue anyway - table might already exist
     }
     
@@ -98,6 +98,7 @@ serve(async (req) => {
       recipientId: data.recipient_id,
       content: data.content,
       timestamp: data.timestamp,
+      isFromCurrentUser: true
     };
 
     // Return a success response with the new message

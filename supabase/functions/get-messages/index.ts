@@ -83,7 +83,8 @@ serve(async (req) => {
       senderId: msg.sender_id,
       recipientId: msg.recipient_id,
       content: msg.content,
-      timestamp: msg.timestamp
+      timestamp: msg.timestamp,
+      isFromCurrentUser: msg.sender_id === userId
     }));
 
     // Return the messages
