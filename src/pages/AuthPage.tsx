@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Globe } from 'lucide-react';
+import { Globe, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useSwipe } from '@/hooks/useSwipe';
 
 const countries = [
   'Spain',
@@ -30,6 +31,23 @@ const AuthPage = () => {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState('');
+  const menuRef = useRef<HTMLDivElement>(null);
+  
+  const { 
+    handleTouchStart, 
+    handleTouchMove, 
+    handleTouchEnd, 
+    handleMouseDown, 
+    handleMouseMove, 
+    handleMouseUp, 
+    handleSwipe,
+    swipeDirection 
+  } = useSwipe({ 
+    containerRef: menuRef,
+    onSwipe: (direction) => {
+      console.log(`Swiped ${direction}`);
+    } 
+  });
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,22 +137,54 @@ const AuthPage = () => {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
       <div className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-sm z-10 py-3 px-2 shadow-sm">
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 max-w-5xl mx-auto scrollbar-thin scrollbar-thumb-muted">
-          <div className="flex-shrink-0 font-medium text-muted-foreground flex items-center gap-1">
-            <Globe size={16} />
-            <span>Explore:</span>
+        <div className="relative max-w-5xl mx-auto">
+          <div 
+            ref={menuRef}
+            className={`flex items-center gap-2 overflow-x-hidden pb-2 scrollbar-thin scrollbar-thumb-muted transition-transform ${
+              swipeDirection === 'left' ? 'animate-slide-out-left' : 
+              swipeDirection === 'right' ? 'animate-slide-out-right' : ''
+            }`}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+          >
+            <div className="flex-shrink-0 font-medium text-muted-foreground flex items-center gap-1 pl-2">
+              <Globe size={16} />
+              <span>Explore:</span>
+            </div>
+            {countries.map((country) => (
+              <Button
+                key={country}
+                variant="outline"
+                size="sm"
+                className={`flex-shrink-0 rounded-full px-3 py-1 text-xs ${selectedCountry === country ? 'bg-primary text-primary-foreground hover:bg-primary/90' : ''}`}
+                onClick={() => handleCountryClick(country)}
+              >
+                {country}
+              </Button>
+            ))}
           </div>
-          {countries.map((country) => (
-            <Button
-              key={country}
-              variant="outline"
-              size="sm"
-              className={`flex-shrink-0 rounded-full px-3 py-1 text-xs ${selectedCountry === country ? 'bg-primary text-primary-foreground hover:bg-primary/90' : ''}`}
-              onClick={() => handleCountryClick(country)}
-            >
-              {country}
-            </Button>
-          ))}
+          
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="absolute left-0 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm rounded-full p-1 h-8 w-8"
+            onClick={() => handleSwipe('right')}
+          >
+            <ChevronLeft size={18} />
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="absolute right-0 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm rounded-full p-1 h-8 w-8"
+            onClick={() => handleSwipe('left')}
+          >
+            <ChevronRight size={18} />
+          </Button>
         </div>
       </div>
       
