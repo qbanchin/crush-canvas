@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -7,6 +6,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Globe } from 'lucide-react';
+
+const countries = [
+  'Spain',
+  'Portugal',
+  'Thailand',
+  'Philippines',
+  'Vietnam',
+  'Cambodia',
+  'Indonesia',
+  'Colombia',
+  'Panama',
+  'Mexico',
+  'Nicaragua',
+  'Costa Rica'
+];
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -14,6 +29,7 @@ const AuthPage = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState('');
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,33 +40,29 @@ const AuthPage = () => {
         throw new Error("Please enter your name");
       }
 
-      // Sign up the user with additional metadata to include the name
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            full_name: name, // Store name in user metadata
+            full_name: name,
           }
         }
       });
       
       if (authError) throw authError;
 
-      // If sign up was successful, create a profile for the user
       if (authData?.user) {
-        // Log the user ID for debugging
         console.log("User created with ID:", authData.user.id);
         
-        // Create a profile in the cards table
         const { error: profileError } = await supabase
           .from('cards')
           .insert({
             id: authData.user.id,
             name: name,
-            age: 25, // Default age that can be updated in profile
+            age: 25,
             bio: "New to Single Expats",
-            images: ["/placeholder.svg"], // Default placeholder image
+            images: ["/placeholder.svg"],
             tags: ["New User"],
             distance: 0
           });
@@ -61,7 +73,6 @@ const AuthPage = () => {
         } else {
           toast.success('Account created successfully! Redirecting to your profile.');
           
-          // Sign in the user automatically after successful signup
           const { error: signInError } = await supabase.auth.signInWithPassword({
             email,
             password,
@@ -71,7 +82,6 @@ const AuthPage = () => {
             throw signInError;
           }
           
-          // Redirect to the profile page instead of the home page
           navigate('/profile');
         }
       }
@@ -101,9 +111,34 @@ const AuthPage = () => {
     }
   };
 
+  const handleCountryClick = (country: string) => {
+    setSelectedCountry(country);
+    toast.info(`Viewing profiles from ${country}`);
+  };
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
+      <div className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-sm z-10 py-3 px-2 shadow-sm">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 max-w-5xl mx-auto scrollbar-thin scrollbar-thumb-muted">
+          <div className="flex-shrink-0 font-medium text-muted-foreground flex items-center gap-1">
+            <Globe size={16} />
+            <span>Explore:</span>
+          </div>
+          {countries.map((country) => (
+            <Button
+              key={country}
+              variant="outline"
+              size="sm"
+              className={`flex-shrink-0 rounded-full px-3 py-1 text-xs ${selectedCountry === country ? 'bg-primary text-primary-foreground hover:bg-primary/90' : ''}`}
+              onClick={() => handleCountryClick(country)}
+            >
+              {country}
+            </Button>
+          ))}
+        </div>
+      </div>
+      
+      <div className="w-full max-w-md space-y-6 mt-16">
         <div className="text-center space-y-4">
           <img 
             src="/lovable-uploads/045f4838-7fe0-4265-943a-0d7ba5dec7de.png" 
@@ -198,6 +233,15 @@ const AuthPage = () => {
             </form>
           </TabsContent>
         </Tabs>
+
+        {selectedCountry && (
+          <div className="mt-8 p-4 border rounded-lg bg-card">
+            <h3 className="text-lg font-medium mb-2">Profiles in {selectedCountry}</h3>
+            <p className="text-muted-foreground text-sm">
+              Create an account to see profiles from {selectedCountry} and start connecting!
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
