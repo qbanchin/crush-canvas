@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { useProfileContext } from '@/contexts/ProfileContext';
+import { MapPin, Loader2 } from 'lucide-react';
 
 const EditProfileDialog: React.FC = () => {
   const { toast } = useToast();
@@ -18,6 +18,8 @@ const EditProfileDialog: React.FC = () => {
     editForm,
     setEditForm
   } = useProfileContext();
+  
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -25,6 +27,62 @@ const EditProfileDialog: React.FC = () => {
       ...editForm,
       [name]: name === 'age' ? parseInt(value) || 0 : value
     });
+  };
+  
+  const detectUserLocation = () => {
+    setIsGettingLocation(true);
+    
+    if (!navigator.geolocation) {
+      toast({
+        title: "Location unavailable",
+        description: "Your browser doesn't support geolocation",
+        variant: "destructive"
+      });
+      setIsGettingLocation(false);
+      return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        // Successfully got location
+        toast({
+          title: "Location detected",
+          description: "Using your current location"
+        });
+        
+        // Set as "Your location" in the form
+        setEditForm({
+          ...editForm,
+          location: "Your location"
+        });
+        setIsGettingLocation(false);
+      },
+      (error) => {
+        // Failed to get location
+        console.error('Geolocation error:', error);
+        let errorMessage = "Couldn't detect your location";
+        
+        if (error.code === 1) {
+          errorMessage = "Location access denied. Please enable location permissions.";
+        } else if (error.code === 2) {
+          errorMessage = "Location unavailable at this time.";
+        } else if (error.code === 3) {
+          errorMessage = "Location request timed out.";
+        }
+        
+        toast({
+          title: "Location error",
+          description: errorMessage,
+          variant: "destructive"
+        });
+        setIsGettingLocation(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+      }
+    );
   };
 
   const handleSaveProfile = async () => {
@@ -154,15 +212,32 @@ const EditProfileDialog: React.FC = () => {
           </div>
           <div className="grid w-full items-center gap-1.5">
             <Label htmlFor="location">Location</Label>
-            <Input 
-              id="location" 
-              name="location"
-              value={editForm.location} 
-              onChange={handleEditFormChange}
-              placeholder="Enter distance (e.g. 10) or 'Your location'"
-            />
+            <div className="flex gap-2">
+              <Input 
+                id="location" 
+                name="location"
+                value={editForm.location} 
+                onChange={handleEditFormChange}
+                placeholder="Enter distance (e.g. 10) or 'Your location'"
+                className="flex-1"
+              />
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={detectUserLocation}
+                disabled={isGettingLocation}
+                title="Use my current location"
+                className="px-3"
+              >
+                {isGettingLocation ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <MapPin className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
             <span className="text-xs text-muted-foreground mt-1">
-              Enter a number for distance in km, or type "Your location"
+              Enter a number for distance in km, type "Your location", or use the location button
             </span>
           </div>
         </div>
