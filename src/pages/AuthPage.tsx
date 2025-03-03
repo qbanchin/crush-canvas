@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -25,13 +24,11 @@ const countries = [
   'Costa Rica'
 ];
 
-// Split countries into 3 rows for mobile view
 const getCountryRows = () => {
-  const rowSize = Math.ceil(countries.length / 3);
+  const rowSize = Math.ceil(countries.length / 2);
   return [
     countries.slice(0, rowSize),
-    countries.slice(rowSize, rowSize * 2),
-    countries.slice(rowSize * 2)
+    countries.slice(rowSize)
   ];
 };
 
@@ -154,7 +151,6 @@ const AuthPage = () => {
       <div className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-sm z-10 py-3 px-2 shadow-sm">
         <div className="relative max-w-5xl mx-auto">
           {isMobile ? (
-            // 3-row layout for mobile
             <div className="flex flex-col gap-2 px-2">
               <div className="flex items-center gap-2 mb-1">
                 <div className="flex-shrink-0 font-medium text-muted-foreground flex items-center gap-1">
@@ -179,7 +175,6 @@ const AuthPage = () => {
               ))}
             </div>
           ) : (
-            // Horizontal scrolling layout for desktop
             <div className="relative">
               <div 
                 ref={menuRef}
