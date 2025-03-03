@@ -14,6 +14,7 @@ export function useSwipe({ isTop = false, onSwipe, containerRef, multiRow = fals
   const [startX, setStartX] = useState(0);
   const [offsetX, setOffsetX] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const [visibleIndex, setVisibleIndex] = useState(0);
   const internalRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   
@@ -59,13 +60,11 @@ export function useSwipe({ isTop = false, onSwipe, containerRef, multiRow = fals
         onSwipe(direction);
       }
       
-      // Scroll the container if available
-      if (ref.current) {
-        const scrollAmount = direction === 'left' ? 200 : -200;
-        ref.current.scrollBy({
-          left: scrollAmount,
-          behavior: 'smooth'
-        });
+      // Instead of scrolling, update the visibleIndex to show different countries
+      if (direction === 'left') {
+        setVisibleIndex(prev => prev + 1);
+      } else {
+        setVisibleIndex(prev => Math.max(0, prev - 1));
       }
       
       // Reset swipe direction after animation
@@ -77,7 +76,7 @@ export function useSwipe({ isTop = false, onSwipe, containerRef, multiRow = fals
       // Reset if it wasn't a significant swipe
       setOffsetX(0);
     }
-  }, [isDragging, offsetX, onSwipe, ref]);
+  }, [isDragging, offsetX, onSwipe]);
 
   const handleTouchEnd = useCallback(() => {
     handleSwipeEnd();
@@ -95,24 +94,24 @@ export function useSwipe({ isTop = false, onSwipe, containerRef, multiRow = fals
       onSwipe(direction);
     }
     
-    if (ref.current) {
-      const scrollAmount = direction === 'left' ? 200 : -200;
-      ref.current.scrollBy({
-        left: scrollAmount,
-        behavior: 'smooth'
-      });
+    if (direction === 'left') {
+      setVisibleIndex(prev => prev + 1);
+    } else {
+      setVisibleIndex(prev => Math.max(0, prev - 1));
     }
     
     setTimeout(() => {
       setSwipeDirection(null);
     }, 300);
-  }, [onSwipe, ref]);
+  }, [onSwipe]);
 
   return {
     ref,
     isDragging,
     offsetX,
     swipeDirection,
+    visibleIndex,
+    setVisibleIndex,
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
