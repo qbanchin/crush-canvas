@@ -1,99 +1,203 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
-import CountryPreviewButtons from '@/components/CountryPreviewButtons';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const AuthPage = () => {
-  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [name, setName] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleAuth = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
+    
     try {
-      if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
+      if (!name.trim()) {
+        throw new Error("Please enter your name");
+      }
 
-        if (error) throw error;
-        toast.success('Registration successful! Check your email for confirmation.');
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+      // Sign up the user with additional metadata to include the name
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name, // Store name in user metadata
+          }
+        }
+      });
+      
+      if (authError) throw authError;
 
-        if (error) throw error;
-        toast.success('Login successful!');
+      // If sign up was successful, create a profile for the user
+      if (authData?.user) {
+        // Log the user ID for debugging
+        console.log("User created with ID:", authData.user.id);
+        
+        // Create a profile in the cards table
+        const { error: profileError } = await supabase
+          .from('cards')
+          .insert({
+            id: authData.user.id,
+            name: name,
+            age: 25, // Default age that can be updated in profile
+            bio: "New to Single Expats",
+            images: ["/placeholder.svg"], // Default placeholder image
+            tags: ["New User"],
+            distance: 0
+          });
+
+        if (profileError) {
+          console.error("Failed to create profile:", profileError);
+          toast.error("Account created but profile setup failed. Please contact support.");
+        } else {
+          toast.success('Account created successfully! Redirecting to your profile.');
+          
+          // Sign in the user automatically after successful signup
+          const { error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+          
+          if (signInError) {
+            throw signInError;
+          }
+          
+          // Redirect to the profile page instead of the home page
+          navigate('/profile');
+        }
       }
     } catch (error: any) {
-      toast.error(error.message || 'Authentication error');
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      navigate('/profile');
+    } catch (error: any) {
+      toast.error(error.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-primary to-primary-foreground p-4">
-      <div className="relative w-full max-w-md">
-        <CountryPreviewButtons />
-        
-        <div className="bg-background rounded-lg shadow-lg p-8 w-full max-w-md z-10 relative">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold">Lovable</h1>
-            <p className="text-muted-foreground mt-2">
-              {isSignUp ? 'Create your account' : 'Sign in to your account'}
-            </p>
-          </div>
-
-          <form onSubmit={handleAuth} className="space-y-4">
-            <div>
-              <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full"
-              />
-            </div>
-            <div>
-              <Input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full"
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading}
-            >
-              {loading ? 'Processing...' : (isSignUp ? 'Sign Up' : 'Sign In')}
-            </Button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-primary hover:underline"
-            >
-              {isSignUp ? 'Already have an account? Sign In' : 'Need an account? Sign Up'}
-            </button>
-          </div>
+    <div className="flex min-h-screen flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-6">
+        <div className="text-center space-y-4">
+          <img 
+            src="/lovable-uploads/045f4838-7fe0-4265-943a-0d7ba5dec7de.png" 
+            alt="Single Expats Logo" 
+            className="w-32 h-32 mx-auto"
+          />
+          <h1 className="text-3xl font-bold">
+            <span className="text-secondary">Single</span> <span className="text-primary">Expats</span>
+          </h1>
+          <p className="text-muted-foreground mt-2">Sign in or create an account to continue</p>
         </div>
+        
+        <Tabs defaultValue="signin" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="signin">Sign In</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="signin">
+            <form onSubmit={handleSignIn} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="your@email.com" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input 
+                  id="password" 
+                  type="password" 
+                  placeholder="••••••••" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Signing in..." : "Sign In"}
+              </Button>
+            </form>
+          </TabsContent>
+          
+          <TabsContent value="signup">
+            <form onSubmit={handleSignUp} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input 
+                  id="name" 
+                  type="text" 
+                  placeholder="Your Name" 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="signup-email">Email</Label>
+                <Input 
+                  id="signup-email" 
+                  type="email" 
+                  placeholder="your@email.com" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="signup-password">Password</Label>
+                <Input 
+                  id="signup-password" 
+                  type="password" 
+                  placeholder="••••••••" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Creating Account..." : "Create Account"}
+              </Button>
+            </form>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
