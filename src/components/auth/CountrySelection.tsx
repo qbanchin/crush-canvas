@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Globe } from 'lucide-react';
@@ -110,12 +109,6 @@ export const CountrySelection: React.FC<CountrySelectionProps> = ({
   if (isMobile) {
     return (
       <div className="flex flex-col gap-3 px-2">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="flex-shrink-0 font-medium text-muted-foreground flex items-center gap-1">
-            <Globe size={16} />
-            <span>Explore:</span>
-          </div>
-        </div>
         
         <div className="relative">
           <div 
