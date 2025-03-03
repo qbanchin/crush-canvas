@@ -55,12 +55,19 @@ const ProfileData: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             ? data.images
             : ["/placeholder.svg"];
 
-          // Format location from distance
-          const userLocation = data.distance != null
-            ? `${data.distance} km away` 
-            : "Your location"; // Use "Your location" when distance is null
+          // Format location based on the distance field
+          let userLocation;
+          console.log('Raw data from DB - distance:', data.distance, 'is null?', data.distance === null);
           
-          console.log('Setting user profile with location:', userLocation, 'Distance value:', data.distance, 'is null?:', data.distance === null);
+          if (data.distance === null) {
+            // When distance is null, use "Your location"
+            userLocation = "Your location";
+            console.log('Setting userLocation to "Your location" because distance is null');
+          } else {
+            // When distance has a value, format as "X km away"
+            userLocation = `${data.distance} km away`;
+            console.log('Setting userLocation to distance format:', userLocation);
+          }
           
           setUser({
             name: fullName,
@@ -71,13 +78,14 @@ const ProfileData: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             interests: data.tags || []
           });
           
+          // Initialize the edit form with the current values
           setEditForm({
             name: fullName,
             age: data.age || 0,
             location: userLocation
           });
           
-          console.log('EditForm set with location:', userLocation);
+          console.log('Profile loaded successfully, location set to:', userLocation);
         }
       } catch (error: any) {
         console.error('Error:', error);

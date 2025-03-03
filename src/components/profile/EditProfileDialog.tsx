@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -45,10 +46,18 @@ const EditProfileDialog: React.FC = () => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         // Successfully got location
+        console.log('Location detected:', position.coords.latitude, position.coords.longitude);
         toast({
           title: "Location detected",
           description: "Using your current location"
         });
+        
+        // Get location coordinates for display or future use
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        // Store coordinates as metadata in localStorage for potential future use
+        localStorage.setItem('userLocationCoords', JSON.stringify({ lat, lng }));
         
         // Set as "Your location" in the form
         setEditForm({
@@ -125,25 +134,37 @@ const EditProfileDialog: React.FC = () => {
         return;
       }
       
-      // Extract distance value from location if it contains "km away" format
+      // Extract distance value from location input
       let distance = null;
-      if (editForm.location.includes('km away')) {
-        const distanceMatch = editForm.location.match(/(\d+)\s*km away/);
+      let locationValue = editForm.location.trim();
+      
+      // Check for "Your location" (case insensitive)
+      if (locationValue.toLowerCase() === "your location") {
+        console.log('Setting distance to null for "Your location"');
+        distance = null;
+      } 
+      // Check for "X km away" format
+      else if (locationValue.includes('km away')) {
+        const distanceMatch = locationValue.match(/(\d+)\s*km away/);
         if (distanceMatch && distanceMatch[1]) {
           distance = parseInt(distanceMatch[1]);
+          console.log('Extracted distance from "km away" format:', distance);
         }
-      } else if (editForm.location.toLowerCase() === "your location") {
-        // Handle "Your location" explicitly as null distance
-        distance = null;
-      } else {
-        // If the location is neither "X km away" nor "Your location", try to parse it as a number
-        const possibleDistance = parseInt(editForm.location);
+      } 
+      // Try to parse as a number directly
+      else {
+        const possibleDistance = parseInt(locationValue);
         if (!isNaN(possibleDistance)) {
           distance = possibleDistance;
+          console.log('Parsed numeric distance:', distance);
+        } else {
+          // If not a number and not "Your location", use as location name with null distance
+          console.log('Using location as text with null distance:', locationValue);
+          distance = null;
         }
       }
       
-      console.log('Saving profile with distance:', distance, 'from location value:', editForm.location);
+      console.log('Saving profile with location:', locationValue, 'distance value:', distance);
       
       // Update the user's profile in the cards table
       const { error } = await supabase
@@ -155,18 +176,24 @@ const EditProfileDialog: React.FC = () => {
         })
         .eq('id', authUser.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase update error:', error);
+        throw error;
+      }
+
+      console.log('Profile updated successfully in database');
 
       // Format the location for display
       const displayLocation = distance !== null 
         ? `${distance} km away` 
-        : "Your location";
-
+        : locationValue; // Use the original location text
+      
+      // Update local user state
       setUser({
         ...user,
         name: editForm.name,
         age: editForm.age,
-        location: displayLocation // Use the formatted location
+        location: displayLocation
       });
 
       setIsEditProfileOpen(false);
@@ -176,6 +203,7 @@ const EditProfileDialog: React.FC = () => {
         description: "Your profile has been successfully updated."
       });
     } catch (error: any) {
+      console.error('Error in handleSaveProfile:', error);
       toast({
         title: "Error updating profile",
         description: error.message,
