@@ -7,6 +7,9 @@ import HeaderBar from '@/components/HeaderBar';
 import NavBar from '@/components/NavBar';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile } from '@/data/profiles';
+import { CountrySelection } from '@/components/auth/CountrySelection';
+import { SelectedCountryInfo } from '@/components/auth/SelectedCountryInfo';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -14,6 +17,13 @@ const Index = () => {
   const [showMatch, setShowMatch] = useState(false);
   const [matchedProfile, setMatchedProfile] = useState<Profile | null>(null);
   const [currentUserID, setCurrentUserID] = useState<string | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState('');
+  const isMobile = useIsMobile();
+
+  const handleCountryClick = (country: string) => {
+    setSelectedCountry(country);
+    toast.info(`Viewing profiles from ${country}`);
+  };
 
   useEffect(() => {
     // Get current user ID first
@@ -156,7 +166,23 @@ const Index = () => {
     <div className="flex flex-col min-h-screen bg-background">
       <HeaderBar />
 
-      <main className="flex-1 flex items-center justify-center p-4 mt-16 mb-20">
+      <div className="fixed top-16 left-0 right-0 bg-background/80 backdrop-blur-sm z-10 py-3 px-2 shadow-sm">
+        <div className="relative max-w-5xl mx-auto">
+          <CountrySelection 
+            selectedCountry={selectedCountry}
+            onCountryClick={handleCountryClick}
+            isMobile={isMobile}
+          />
+        </div>
+      </div>
+
+      <main className="flex-1 flex items-center justify-center p-4 mt-32 mb-20">
+        {selectedCountry && (
+          <div className="absolute top-28 left-0 right-0 px-4 z-5">
+            <SelectedCountryInfo selectedCountry={selectedCountry} />
+          </div>
+        )}
+        
         {loading ? (
           <div className="animate-pulse flex flex-col items-center">
             <div className="h-96 w-72 bg-muted rounded-xl"></div>
