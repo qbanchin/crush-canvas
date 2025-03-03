@@ -1,7 +1,6 @@
-
 import React, { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Binoculars, MessageSquare, User, CheckCircle, Globe } from 'lucide-react';
+import { Binoculars, MessageSquare, User, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -26,13 +25,6 @@ const NavBar: React.FC<NavBarProps> = ({ className }) => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 flex justify-center items-center py-4 px-6 bg-background/80 backdrop-blur-md border-b z-10">
-        <NavLink to="/" className="flex flex-col items-center gap-1">
-          <Globe size={28} className="text-primary" />
-          <span className="font-semibold text-sm">DigitalNomad</span>
-        </NavLink>
-      </header>
-      
       <nav className={cn(
         "fixed bottom-0 left-0 right-0 flex justify-around items-center py-4 px-6 bg-background/80 backdrop-blur-md border-t z-10",
         className

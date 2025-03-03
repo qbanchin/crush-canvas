@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { MenuIcon, XIcon, ChevronLeftIcon, Globe, MessageSquare } from 'lucide-react';
+import { MenuIcon, XIcon, ChevronLeftIcon, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -34,14 +34,22 @@ const HeaderBar = () => {
     if (path === '/') {
       return (
         <div className="flex items-center gap-2">
-          <Globe size={18} className="text-primary" />
+          <img 
+            src="/lovable-uploads/a4a97865-568a-4074-abcc-2840f7548543.png" 
+            alt="DigitalNomad Logo" 
+            className="w-6 h-6"
+          />
           <h1 className="text-lg font-semibold">{title}</h1>
         </div>
       );
     } else if (path === '/matches') {
       return (
         <div className="flex items-center gap-2">
-          <MessageSquare size={18} className="text-primary" />
+          <img 
+            src="/lovable-uploads/a4a97865-568a-4074-abcc-2840f7548543.png" 
+            alt="DigitalNomad Logo" 
+            className="w-6 h-6"
+          />
           <h1 className="text-lg font-semibold">{title}</h1>
         </div>
       );
