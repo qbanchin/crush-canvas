@@ -20,35 +20,33 @@ export function useSwipe({ isTop = false, onSwipe, containerRef, multiRow = fals
   const ref = containerRef || internalRef;
 
   const handleTouchStart = useCallback((e: React.TouchEvent | TouchEvent) => {
-    if (multiRow && isMobile) return; // Disable touch handling for multi-row mobile layout
     setIsDragging(true);
     setStartX(e.touches[0].clientX);
     setOffsetX(0);
-  }, [multiRow, isMobile]);
+  }, []);
 
   const handleMouseDown = useCallback((e: React.MouseEvent | MouseEvent) => {
-    if (multiRow && isMobile) return; // Disable mouse handling for multi-row mobile layout
     setIsDragging(true);
     setStartX(e.clientX);
     setOffsetX(0);
-  }, [multiRow, isMobile]);
+  }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent | TouchEvent) => {
-    if (!isDragging || (multiRow && isMobile)) return;
+    if (!isDragging) return;
     const currentX = e.touches[0].clientX;
     const diff = currentX - startX;
     setOffsetX(diff);
-  }, [isDragging, startX, multiRow, isMobile]);
+  }, [isDragging, startX]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent | MouseEvent) => {
-    if (!isDragging || (multiRow && isMobile)) return;
+    if (!isDragging) return;
     const currentX = e.clientX;
     const diff = currentX - startX;
     setOffsetX(diff);
-  }, [isDragging, startX, multiRow, isMobile]);
+  }, [isDragging, startX]);
 
   const handleSwipeEnd = useCallback(() => {
-    if (!isDragging || (multiRow && isMobile)) return;
+    if (!isDragging) return;
     
     setIsDragging(false);
     
@@ -79,7 +77,7 @@ export function useSwipe({ isTop = false, onSwipe, containerRef, multiRow = fals
       // Reset if it wasn't a significant swipe
       setOffsetX(0);
     }
-  }, [isDragging, offsetX, onSwipe, ref, multiRow, isMobile]);
+  }, [isDragging, offsetX, onSwipe, ref]);
 
   const handleTouchEnd = useCallback(() => {
     handleSwipeEnd();
@@ -91,8 +89,6 @@ export function useSwipe({ isTop = false, onSwipe, containerRef, multiRow = fals
 
   // Manual swipe function for button controls
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
-    if (multiRow && isMobile) return; // Don't handle swipes for multi-row mobile layout
-    
     setSwipeDirection(direction);
     
     if (onSwipe) {
@@ -110,7 +106,7 @@ export function useSwipe({ isTop = false, onSwipe, containerRef, multiRow = fals
     setTimeout(() => {
       setSwipeDirection(null);
     }, 300);
-  }, [onSwipe, ref, multiRow, isMobile]);
+  }, [onSwipe, ref]);
 
   return {
     ref,

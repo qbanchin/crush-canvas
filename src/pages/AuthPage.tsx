@@ -9,13 +9,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Globe, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useSwipe } from '@/hooks/useSwipe';
 
-const countries = [
+const topRowCountries = [
   'Spain',
   'Portugal',
   'Thailand',
   'Philippines',
   'Vietnam',
-  'Cambodia',
+  'Cambodia'
+];
+
+const bottomRowCountries = [
   'Indonesia',
   'Colombia',
   'Panama',
@@ -24,13 +27,7 @@ const countries = [
   'Costa Rica'
 ];
 
-const getCountryRows = () => {
-  const rowSize = Math.ceil(countries.length / 2);
-  return [
-    countries.slice(0, rowSize),
-    countries.slice(rowSize)
-  ];
-};
+const countries = [...topRowCountries, ...bottomRowCountries];
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -39,23 +36,56 @@ const AuthPage = () => {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState('');
-  const menuRef = useRef<HTMLDivElement>(null);
+  const topRowRef = useRef<HTMLDivElement>(null);
+  const bottomRowRef = useRef<HTMLDivElement>(null);
+  const desktopMenuRef = useRef<HTMLDivElement>(null);
   
   const { 
-    handleTouchStart, 
-    handleTouchMove, 
-    handleTouchEnd, 
-    handleMouseDown, 
-    handleMouseMove, 
-    handleMouseUp, 
-    handleSwipe,
-    swipeDirection,
+    handleTouchStart: handleTopRowTouchStart, 
+    handleTouchMove: handleTopRowTouchMove, 
+    handleTouchEnd: handleTopRowTouchEnd, 
+    handleMouseDown: handleTopRowMouseDown, 
+    handleMouseMove: handleTopRowMouseMove, 
+    handleMouseUp: handleTopRowMouseUp, 
+    handleSwipe: handleTopRowSwipe,
+    swipeDirection: topRowSwipeDirection,
     isMobile
   } = useSwipe({ 
-    containerRef: menuRef,
-    multiRow: true,
+    containerRef: topRowRef,
     onSwipe: (direction) => {
-      console.log(`Swiped ${direction}`);
+      console.log(`Top row swiped ${direction}`);
+    } 
+  });
+  
+  const { 
+    handleTouchStart: handleBottomRowTouchStart, 
+    handleTouchMove: handleBottomRowTouchMove, 
+    handleTouchEnd: handleBottomRowTouchEnd, 
+    handleMouseDown: handleBottomRowMouseDown, 
+    handleMouseMove: handleBottomRowMouseMove, 
+    handleMouseUp: handleBottomRowMouseUp, 
+    handleSwipe: handleBottomRowSwipe,
+    swipeDirection: bottomRowSwipeDirection
+  } = useSwipe({ 
+    containerRef: bottomRowRef,
+    onSwipe: (direction) => {
+      console.log(`Bottom row swiped ${direction}`);
+    } 
+  });
+  
+  const { 
+    handleTouchStart: handleDesktopTouchStart, 
+    handleTouchMove: handleDesktopTouchMove, 
+    handleTouchEnd: handleDesktopTouchEnd, 
+    handleMouseDown: handleDesktopMouseDown, 
+    handleMouseMove: handleDesktopMouseMove, 
+    handleMouseUp: handleDesktopMouseUp, 
+    handleSwipe: handleDesktopSwipe,
+    swipeDirection: desktopSwipeDirection
+  } = useSwipe({ 
+    containerRef: desktopMenuRef,
+    onSwipe: (direction) => {
+      console.log(`Desktop menu swiped ${direction}`);
     } 
   });
 
@@ -144,23 +174,34 @@ const AuthPage = () => {
     toast.info(`Viewing profiles from ${country}`);
   };
 
-  const countryRows = getCountryRows();
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
       <div className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-sm z-10 py-3 px-2 shadow-sm">
         <div className="relative max-w-5xl mx-auto">
           {isMobile ? (
-            <div className="flex flex-col gap-2 px-2">
+            <div className="flex flex-col gap-3 px-2">
               <div className="flex items-center gap-2 mb-1">
                 <div className="flex-shrink-0 font-medium text-muted-foreground flex items-center gap-1">
                   <Globe size={16} />
                   <span>Explore:</span>
                 </div>
               </div>
-              {countryRows.map((row, rowIndex) => (
-                <div key={rowIndex} className="flex flex-wrap gap-2 justify-center">
-                  {row.map((country) => (
+              
+              <div className="relative">
+                <div 
+                  ref={topRowRef}
+                  className={`flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-muted transition-transform ${
+                    topRowSwipeDirection === 'left' ? 'animate-slide-out-left' : 
+                    topRowSwipeDirection === 'right' ? 'animate-slide-out-right' : ''
+                  }`}
+                  onTouchStart={handleTopRowTouchStart}
+                  onTouchMove={handleTopRowTouchMove}
+                  onTouchEnd={handleTopRowTouchEnd}
+                  onMouseDown={handleTopRowMouseDown}
+                  onMouseMove={handleTopRowMouseMove}
+                  onMouseUp={handleTopRowMouseUp}
+                >
+                  {topRowCountries.map((country) => (
                     <Button
                       key={country}
                       variant="outline"
@@ -172,22 +213,86 @@ const AuthPage = () => {
                     </Button>
                   ))}
                 </div>
-              ))}
+                
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="absolute left-0 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm rounded-full p-1 h-8 w-8"
+                  onClick={() => handleTopRowSwipe('right')}
+                >
+                  <ChevronLeft size={18} />
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="absolute right-0 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm rounded-full p-1 h-8 w-8"
+                  onClick={() => handleTopRowSwipe('left')}
+                >
+                  <ChevronRight size={18} />
+                </Button>
+              </div>
+              
+              <div className="relative">
+                <div 
+                  ref={bottomRowRef}
+                  className={`flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-muted transition-transform ${
+                    bottomRowSwipeDirection === 'left' ? 'animate-slide-out-left' : 
+                    bottomRowSwipeDirection === 'right' ? 'animate-slide-out-right' : ''
+                  }`}
+                  onTouchStart={handleBottomRowTouchStart}
+                  onTouchMove={handleBottomRowTouchMove}
+                  onTouchEnd={handleBottomRowTouchEnd}
+                  onMouseDown={handleBottomRowMouseDown}
+                  onMouseMove={handleBottomRowMouseMove}
+                  onMouseUp={handleBottomRowMouseUp}
+                >
+                  {bottomRowCountries.map((country) => (
+                    <Button
+                      key={country}
+                      variant="outline"
+                      size="sm"
+                      className={`flex-shrink-0 rounded-full px-3 py-1 text-xs ${selectedCountry === country ? 'bg-primary text-primary-foreground hover:bg-primary/90' : ''}`}
+                      onClick={() => handleCountryClick(country)}
+                    >
+                      {country}
+                    </Button>
+                  ))}
+                </div>
+                
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="absolute left-0 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm rounded-full p-1 h-8 w-8"
+                  onClick={() => handleBottomRowSwipe('right')}
+                >
+                  <ChevronLeft size={18} />
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="absolute right-0 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm rounded-full p-1 h-8 w-8"
+                  onClick={() => handleBottomRowSwipe('left')}
+                >
+                  <ChevronRight size={18} />
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="relative">
               <div 
-                ref={menuRef}
+                ref={desktopMenuRef}
                 className={`flex items-center gap-2 overflow-x-hidden pb-2 scrollbar-thin scrollbar-thumb-muted transition-transform ${
-                  swipeDirection === 'left' ? 'animate-slide-out-left' : 
-                  swipeDirection === 'right' ? 'animate-slide-out-right' : ''
+                  desktopSwipeDirection === 'left' ? 'animate-slide-out-left' : 
+                  desktopSwipeDirection === 'right' ? 'animate-slide-out-right' : ''
                 }`}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
+                onTouchStart={handleDesktopTouchStart}
+                onTouchMove={handleDesktopTouchMove}
+                onTouchEnd={handleDesktopTouchEnd}
+                onMouseDown={handleDesktopMouseDown}
+                onMouseMove={handleDesktopMouseMove}
+                onMouseUp={handleDesktopMouseUp}
               >
                 <div className="flex-shrink-0 font-medium text-muted-foreground flex items-center gap-1 pl-2">
                   <Globe size={16} />
@@ -210,7 +315,7 @@ const AuthPage = () => {
                 variant="ghost" 
                 size="icon" 
                 className="absolute left-0 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm rounded-full p-1 h-8 w-8"
-                onClick={() => handleSwipe('right')}
+                onClick={() => handleDesktopSwipe('right')}
               >
                 <ChevronLeft size={18} />
               </Button>
@@ -219,7 +324,7 @@ const AuthPage = () => {
                 variant="ghost" 
                 size="icon" 
                 className="absolute right-0 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm rounded-full p-1 h-8 w-8"
-                onClick={() => handleSwipe('left')}
+                onClick={() => handleDesktopSwipe('left')}
               >
                 <ChevronRight size={18} />
               </Button>
