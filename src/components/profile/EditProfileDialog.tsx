@@ -67,12 +67,22 @@ const EditProfileDialog: React.FC = () => {
         return;
       }
       
+      // Extract distance value from location if it contains "km away" format
+      let distance = null;
+      if (editForm.location.includes('km away')) {
+        const distanceMatch = editForm.location.match(/(\d+)\s*km away/);
+        if (distanceMatch && distanceMatch[1]) {
+          distance = parseInt(distanceMatch[1]);
+        }
+      }
+      
       // Update the user's profile in the cards table
       const { error } = await supabase
         .from('cards')
         .update({ 
           name: editForm.name,
-          age: editForm.age
+          age: editForm.age,
+          distance: distance // Save the distance value
         })
         .eq('id', authUser.id);
       

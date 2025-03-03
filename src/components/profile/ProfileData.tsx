@@ -55,16 +55,18 @@ const ProfileData: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             ? data.images
             : ["/placeholder.svg"];
 
-          // Since location isn't in the database schema, use distance or a default
+          // Format location from distance
           const userLocation = data.distance 
             ? `${data.distance} km away` 
             : "Your location"; // Default location if not set
+          
+          console.log('Setting user profile with location:', userLocation);
           
           setUser({
             name: fullName,
             age: data.age || 0,
             bio: data.bio || "",
-            location: userLocation, // Use the derived location
+            location: userLocation,
             images: userImages,
             interests: data.tags || []
           });
@@ -72,8 +74,10 @@ const ProfileData: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           setEditForm({
             name: fullName,
             age: data.age || 0,
-            location: userLocation // Use the derived location
+            location: userLocation
           });
+          
+          console.log('EditForm set with location:', userLocation);
         }
       } catch (error: any) {
         console.error('Error:', error);
