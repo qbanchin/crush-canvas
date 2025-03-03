@@ -1,49 +1,54 @@
 
 import { useState, useRef, useCallback } from 'react';
+import { useIsMobile } from './use-mobile';
 
 interface UseSwipeProps {
   isTop?: boolean;
   onSwipe?: (direction: 'left' | 'right') => void;
   containerRef?: React.RefObject<HTMLElement>;
+  multiRow?: boolean;
 }
 
-export function useSwipe({ isTop = false, onSwipe, containerRef }: UseSwipeProps = {}) {
+export function useSwipe({ isTop = false, onSwipe, containerRef, multiRow = false }: UseSwipeProps = {}) {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [offsetX, setOffsetX] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const internalRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
   
   const ref = containerRef || internalRef;
 
   const handleTouchStart = useCallback((e: React.TouchEvent | TouchEvent) => {
+    if (multiRow && isMobile) return; // Disable touch handling for multi-row mobile layout
     setIsDragging(true);
     setStartX(e.touches[0].clientX);
     setOffsetX(0);
-  }, []);
+  }, [multiRow, isMobile]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent | MouseEvent) => {
+    if (multiRow && isMobile) return; // Disable mouse handling for multi-row mobile layout
     setIsDragging(true);
     setStartX(e.clientX);
     setOffsetX(0);
-  }, []);
+  }, [multiRow, isMobile]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent | TouchEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || (multiRow && isMobile)) return;
     const currentX = e.touches[0].clientX;
     const diff = currentX - startX;
     setOffsetX(diff);
-  }, [isDragging, startX]);
+  }, [isDragging, startX, multiRow, isMobile]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent | MouseEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || (multiRow && isMobile)) return;
     const currentX = e.clientX;
     const diff = currentX - startX;
     setOffsetX(diff);
-  }, [isDragging, startX]);
+  }, [isDragging, startX, multiRow, isMobile]);
 
   const handleSwipeEnd = useCallback(() => {
-    if (!isDragging) return;
+    if (!isDragging || (multiRow && isMobile)) return;
     
     setIsDragging(false);
     
@@ -74,7 +79,7 @@ export function useSwipe({ isTop = false, onSwipe, containerRef }: UseSwipeProps
       // Reset if it wasn't a significant swipe
       setOffsetX(0);
     }
-  }, [isDragging, offsetX, onSwipe, ref]);
+  }, [isDragging, offsetX, onSwipe, ref, multiRow, isMobile]);
 
   const handleTouchEnd = useCallback(() => {
     handleSwipeEnd();
@@ -86,6 +91,8 @@ export function useSwipe({ isTop = false, onSwipe, containerRef }: UseSwipeProps
 
   // Manual swipe function for button controls
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
+    if (multiRow && isMobile) return; // Don't handle swipes for multi-row mobile layout
+    
     setSwipeDirection(direction);
     
     if (onSwipe) {
@@ -103,7 +110,7 @@ export function useSwipe({ isTop = false, onSwipe, containerRef }: UseSwipeProps
     setTimeout(() => {
       setSwipeDirection(null);
     }, 300);
-  }, [onSwipe, ref]);
+  }, [onSwipe, ref, multiRow, isMobile]);
 
   return {
     ref,
@@ -116,6 +123,7 @@ export function useSwipe({ isTop = false, onSwipe, containerRef }: UseSwipeProps
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-    handleSwipe
+    handleSwipe,
+    isMobile
   };
 }
