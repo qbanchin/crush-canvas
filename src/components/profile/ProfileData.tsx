@@ -56,11 +56,11 @@ const ProfileData: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             : ["/placeholder.svg"];
 
           // Format location from distance
-          const userLocation = data.distance 
+          const userLocation = data.distance != null
             ? `${data.distance} km away` 
-            : "Your location"; // Default location if not set
+            : "Your location"; // Use "Your location" when distance is null
           
-          console.log('Setting user profile with location:', userLocation, 'Distance value:', data.distance);
+          console.log('Setting user profile with location:', userLocation, 'Distance value:', data.distance, 'is null?:', data.distance === null);
           
           setUser({
             name: fullName,

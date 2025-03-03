@@ -74,8 +74,8 @@ const EditProfileDialog: React.FC = () => {
         if (distanceMatch && distanceMatch[1]) {
           distance = parseInt(distanceMatch[1]);
         }
-      } else if (editForm.location === "Your location") {
-        // Handle "Your location" by setting a null distance value
+      } else if (editForm.location.toLowerCase() === "your location") {
+        // Handle "Your location" explicitly as null distance
         distance = null;
       } else {
         // If the location is neither "X km away" nor "Your location", try to parse it as a number
@@ -85,7 +85,7 @@ const EditProfileDialog: React.FC = () => {
         }
       }
       
-      console.log('Saving profile with distance:', distance);
+      console.log('Saving profile with distance:', distance, 'from location value:', editForm.location);
       
       // Update the user's profile in the cards table
       const { error } = await supabase
@@ -99,11 +99,16 @@ const EditProfileDialog: React.FC = () => {
       
       if (error) throw error;
 
+      // Format the location for display
+      const displayLocation = distance !== null 
+        ? `${distance} km away` 
+        : "Your location";
+
       setUser({
         ...user,
         name: editForm.name,
         age: editForm.age,
-        location: editForm.location
+        location: displayLocation // Use the formatted location
       });
 
       setIsEditProfileOpen(false);
@@ -154,8 +159,11 @@ const EditProfileDialog: React.FC = () => {
               name="location"
               value={editForm.location} 
               onChange={handleEditFormChange}
-              placeholder="Enter distance (e.g. 10) or custom location"
+              placeholder="Enter distance (e.g. 10) or 'Your location'"
             />
+            <span className="text-xs text-muted-foreground mt-1">
+              Enter a number for distance in km, or type "Your location"
+            </span>
           </div>
         </div>
         <DialogFooter>
