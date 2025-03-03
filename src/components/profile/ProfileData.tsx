@@ -60,7 +60,7 @@ const ProfileData: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             ? `${data.distance} km away` 
             : "Your location"; // Default location if not set
           
-          console.log('Setting user profile with location:', userLocation);
+          console.log('Setting user profile with location:', userLocation, 'Distance value:', data.distance);
           
           setUser({
             name: fullName,

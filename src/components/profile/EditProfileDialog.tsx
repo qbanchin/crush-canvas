@@ -74,7 +74,18 @@ const EditProfileDialog: React.FC = () => {
         if (distanceMatch && distanceMatch[1]) {
           distance = parseInt(distanceMatch[1]);
         }
+      } else if (editForm.location === "Your location") {
+        // Handle "Your location" by setting a null distance value
+        distance = null;
+      } else {
+        // If the location is neither "X km away" nor "Your location", try to parse it as a number
+        const possibleDistance = parseInt(editForm.location);
+        if (!isNaN(possibleDistance)) {
+          distance = possibleDistance;
+        }
       }
+      
+      console.log('Saving profile with distance:', distance);
       
       // Update the user's profile in the cards table
       const { error } = await supabase
@@ -143,6 +154,7 @@ const EditProfileDialog: React.FC = () => {
               name="location"
               value={editForm.location} 
               onChange={handleEditFormChange}
+              placeholder="Enter distance (e.g. 10) or custom location"
             />
           </div>
         </div>
