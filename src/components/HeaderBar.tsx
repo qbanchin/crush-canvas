@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { MenuIcon, XIcon, ChevronLeftIcon } from 'lucide-react';
+import { MenuIcon, XIcon, ChevronLeftIcon, Globe, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -27,6 +27,29 @@ const HeaderBar = () => {
     return '';
   };
 
+  const renderTitleWithIcon = () => {
+    const title = getTitle();
+    const path = location.pathname;
+    
+    if (path === '/') {
+      return (
+        <div className="flex items-center gap-2">
+          <Globe size={18} className="text-primary" />
+          <h1 className="text-lg font-semibold">{title}</h1>
+        </div>
+      );
+    } else if (path === '/matches') {
+      return (
+        <div className="flex items-center gap-2">
+          <MessageSquare size={18} className="text-primary" />
+          <h1 className="text-lg font-semibold">{title}</h1>
+        </div>
+      );
+    }
+    
+    return <h1 className="text-lg font-semibold">{title}</h1>;
+  };
+
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
@@ -50,7 +73,7 @@ const HeaderBar = () => {
           </button>
         ) : null}
         
-        <h1 className="text-lg font-semibold">{getTitle()}</h1>
+        {renderTitleWithIcon()}
       </div>
       
       {!isAuthPage && (

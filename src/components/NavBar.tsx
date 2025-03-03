@@ -45,10 +45,7 @@ const NavBar: React.FC<NavBarProps> = ({ className }) => {
           )}
           end
         >
-          <div className="flex items-center gap-0.5">
-            <Globe size={16} className="inline-block" />
-            <Binoculars size={24} />
-          </div>
+          <Binoculars size={24} />
           <span>Explore</span>
         </NavLink>
         
